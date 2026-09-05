@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE tv SYSTEM "xmltv.dtd">
+<tv generator-info-name="GuiaTVMax">
+  <channel id="TVMAX.py">
+    <display-name lang="es">TV Max Coronel Oviedo</display-name>
+  </channel>
+  <!-- LUNES -->
+  <programme start="20260831050000 -0300" stop="20260831073000 -0300" channel="TVMAX.py"><title lang="es">Amaneciendo con Juanpa</title></programme>
+  <programme start="20260831073000 -0300" stop="20260831115000 -0300" channel="TVMAX.py"><title lang="es">Ciudad al Día</title></programme>
+  <programme start="20260831120000 -0300" stop="20260831123000 -0300" channel="TVMAX.py"><title lang="es">Noticiero del Mediodía</title></programme>
+  <programme start="20260831123000 -0300" stop="20260831133000 -0300" channel="TVMAX.py"><title lang="es">Música Paraguaya</title></programme>
+  <programme start="20260831133000 -0300" stop="20260831153000 -0300" channel="TVMAX.py"><title lang="es">90 Minutos con Lau + 30 Min Extra</title></programme>
+  <programme start="20260831160000 -0300" stop="20260831180000 -0300" channel="TVMAX.py"><title lang="es">Nada Está Dicho</title></programme>
+  <programme start="20260831180000 -0300" stop="20260831190000 -0300" channel="TVMAX.py"><title lang="es">Solo Clips</title></programme>
+  <programme start="20260831190000 -0300" stop="20260831200000 -0300" channel="TVMAX.py"><title lang="es">Noticiero Central</title></programme>
+  <programme start="20260831200000 -0300" stop="20260831220000 -0300" channel="TVMAX.py"><title lang="es">Cobertura Deportiva</title></programme>
+  <!-- MARTES -->
+  <programme start="20260901050000 -0300" stop="20260901073000 -0300" channel="TVMAX.py"><title lang="es">Amaneciendo con Juanpa</title></programme>
+  <programme start="20260901073000 -0300" stop="20260901115000 -0300" channel="TVMAX.py"><title lang="es">Ciudad al Día</title></programme>
+  <programme start="20260901120000 -0300" stop="20260901123000 -0300" channel="TVMAX.py"><title lang="es">Noticiero del Mediodía</title></programme>
+  <programme start="20260901123000 -0300" stop="{{MARTES}133000 -0300" channel="TVMAX.py"><title lang="es">Música Paraguaya</title></programme>
+  <programme start="20260901133000 -0300" stop="20260901153000 -0300" channel="TVMAX.py"><title lang="es">90 Minutos con Lau + 30 Min Extra</title></programme>
+  <programme start="20260901160000 -0300" stop="20260901180000 -0300" channel="TVMAX.py"><title lang="es">Nada Está Dicho</title></programme>
+  <programme start="20260901180000 -0300" stop="20260901190000 -0300" channel="TVMAX.py"><title lang="es">Solo Clips</title></programme>
+  <programme start="20260901190000 -0300" stop="20260901200000 -0300" channel="TVMAX.py"><title lang="es">Noticiero Central</title></programme>
+  <programme start="20260901200000 -0300" stop="20260901220000 -0300" channel="TVMAX.py"><title lang="es">Algo se Está Cocinando</title></programme>
+  <!-- MIERCOLES -->
+  <programme start="20260902050000 -0300" stop="20260902073000 -0300" channel="TVMAX.py"><title lang="es">Amaneciendo con Juanpa</title></programme>
+  <programme start="20260902073000 -0300" stop="20260902115000 -0300" channel="TVMAX.py"><title lang="es">Ciudad al Día</title></programme>
+  <programme start="20260902120000 -0300" stop="20260902123000 -0300" channel="TVMAX.py"><title lang="es">Noticiero del Mediodía</title></programme>
+  <programme start="20260902123000 -0300" stop="20260902133000 -0300" channel="TVMAX.py"><title lang="es">Música Paraguaya</title></programme>
+  <programme start="20260902133000 -0300" stop="20260902153000 -0300" channel="TVMAX.py"><title lang="es">90 Minutos con Lau + 30 Min Extra</title></programme>
+  <programme start="20260902160000 -0300" stop="20260902170000 -0300" channel="TVMAX.py"><title lang="es">Nutriemociones</title></programme>
+  <programme start="20260902170000 -0300" stop="20260902190000 -0300" channel="TVMAX.py"><title lang="es">Solo Clips</title></programme>
+  <programme start="20260902190000 -0300" stop="20260902200000 -0300" channel="TVMAX.py"><title lang="es">Noticiero Central</title></programme>
+  <programme start="20260902200000 -0300" stop="20260902210000 -0300" channel="TVMAX.py"><title lang="es">Max Deportes</title></programme>
+  <!-- JUEVES -->
+  <programme start="20260903050000 -0300" stop="20260903073000 -0300" channel="TVMAX.py"><title lang="es">Amaneciendo con Juanpa</title></programme>
+  <programme start="20260903073000 -0300" stop="20260903115000 -0300" channel="TVMAX.py"><title lang="es">Ciudad al Día</title></programme>
+  <programme start="20260903120000 -0300" stop="20260903123000 -0300" channel="TVMAX.py"><title lang="es">Noticiero del Mediodía</title></programme>
+  <programme start="20260903123000 -0300" stop="20260903133000 -0300" channel="TVMAX.py"><title lang="es">Música Paraguaya</title></programme>
+  <programme start="20260903133000 -0300" stop="20260903153000 -0300" channel="TVMAX.py"><title lang="es">90 Minutos con Lau + 30 Min Extra</title></programme>
+  <programme start="20260903153000 -0300" stop="20260903173000 -0300" channel="TVMAX.py"><title lang="es">Solo Clips</title></programme>
+  <programme start="20260903173000 -0300" stop="20260903190000 -0300" channel="TVMAX.py"><title lang="es">Tarde al Máximo</title></programme>
+  <programme start="20260903190000 -0300" stop="20260903200000 -0300" channel="TVMAX.py"><title lang="es">Noticiero Central</title></programme>
+  <programme start="20260903200000 -0300" stop="20260903213000 -0300" channel="TVMAX.py"><title lang="es">Tarde al Máximo (Repetición)</title></programme>
+  <!-- VIERNES -->
+  <programme start="20260904050000 -0300" stop="20260904073000 -0300" channel="TVMAX.py"><title lang="es">Amaneciendo con Juanpa</title></programme>
+  <programme start="20260904073000 -0300" stop="20260904115000 -0300" channel="TVMAX.py"><title lang="es">Ciudad al Día</title></programme>
+  <programme start="20260904120000 -0300" stop="20260904123000 -0300" channel="TVMAX.py"><title lang="es">Noticiero del Mediodía</title></programme>
+  <programme start="20260904123000 -0300" stop="20260904133000 -0300" channel="TVMAX.py"><title lang="es">Música Paraguaya</title></programme>
+  <programme start="20260904133000 -0300" stop="20260904140000 -0300" channel="TVMAX.py"><title lang="es">90 Minutos con Lau</title></programme>
+  <programme start="20260904140000 -0300" stop="20260904160000 -0300" channel="TVMAX.py"><title lang="es">Nada Está Dicho (Especial)</title></programme>
+  <programme start="20260904160000 -0300" stop="20260904170000 -0300" channel="TVMAX.py"><title lang="es">Solo Clips</title></programme>
+  <programme start="20260904170000 -0300" stop="20260904190000 -0300" channel="TVMAX.py"><title lang="es">La Máquina TV</title></programme>
+  <programme start="20260904190000 -0300" stop="20260904200000 -0300" channel="TVMAX.py"><title lang="es">Noticiero Central</title></programme>
+  <programme start="20260904200000 -0300" stop="20260904220000 -0300" channel="TVMAX.py"><title lang="es">Nada Está Dicho (Especial - Reemisión)</title></programme>
+  <!-- SABADO -->
+  <programme start="20260905090000 -0300" stop="20260905110000 -0300" channel="TVMAX.py"><title lang="es">Lo Nuestro</title></programme>
+  <programme start="20260905110000 -0300" stop="20260905120000 -0300" channel="TVMAX.py"><title lang="es">Música Paraguaya</title></programme>
+  <programme start="20260905120000 -0300" stop="20260905130000 -0300" channel="TVMAX.py"><title lang="es">Resumen de Noticias</title></programme>
+  <programme start="20260905130000 -0300" stop="20260905150000 -0300" channel="TVMAX.py"><title lang="es">La Máquina (Repetición)</title></programme>
+  <programme start="20260905150000 -0300" stop="20260905170000 -0300" channel="TVMAX.py"><title lang="es">Nada Está Dicho (Repetición)</title></programme>
+  <programme start="20260905170000 -0300" stop="20260905180000 -0300" channel="TVMAX.py"><title lang="es">Nutriemociones (Repetición)</title></programme>
+  <programme start="20260905180000 -0300" stop="20260905193000 -0300" channel="TVMAX.py"><title lang="es">Tarde al Máximo (Repetición)</title></programme>
+  <programme start="20260905193000 -0300" stop="20260905203000 -0300" channel="TVMAX.py"><title lang="es">Resumen de Noticias</title></programme>
+  <programme start="20260905203000 -0300" stop="20260905213000 -0300" channel="TVMAX.py"><title lang="es">Max Deportes (Repetición)</title></programme>
+  <programme start="20260905213000 -0300" stop="20260905233000 -0300" channel="TVMAX.py"><title lang="es">Un Poco de Cumbia</title></programme>
+  <!-- DOMINGO -->
+  <programme start="20260906090000 -0300" stop="20260906110000 -0300" channel="TVMAX.py"><title lang="es">Lo Nuestro</title></programme>
+  <programme start="20260906110000 -0300" stop="20260906120000 -0300" channel="TVMAX.py"><title lang="es">Música Paraguaya</title></programme>
+  <programme start="20260906120000 -0300" stop="20260906130000 -0300" channel="TVMAX.py"><title lang="es">Resumen de Noticias</title></programme>
+  <programme start="20260906130000 -0300" stop="20260906150000 -0300" channel="TVMAX.py"><title lang="es">Solo Clips</title></programme>
+  <programme start="20260906150000 -0300" stop="20260906180000 -0300" channel="TVMAX.py"><title lang="es">Cobertura Deportiva</title></programme>
+  <programme start="20260906180000 -0300" stop="20260906200000 -0300" channel="TVMAX.py"><title lang="es">Reemisión Cobertura Deportiva</title></programme>
+</tv>
