@@ -140,8 +140,8 @@ def run():
             try: os.remove(path)
             except: pass
 
-    # 3. Generar JSON optimizado
-    print("🚀 Optimizando datos para la WEB...")
+    # 3. Generar JSON optimizado para WEB
+    print("🚀 Generando archivos para WEB y APP...")
 
     # Agrupar programas por canal
     db = {}
@@ -184,7 +184,41 @@ def run():
     with open(os.path.join(DATA_DIR, "countries.json"), "w", encoding="utf-8") as f:
         json.dump(countries_data, f, indent=2, ensure_ascii=False)
 
-    print(f"✅ Proceso terminado. {len(final_list)} canales generados.")
+    # 4. GENERAR XMLTV PARA LA APP (guide.xml y guide.xml.gz)
+    print("📺 Generando guide.xml para la APP...")
+    XML_OUTPUT = os.path.join(BASE_DIR, "guide.xml")
+    GZ_OUTPUT = os.path.join(BASE_DIR, "guide.xml.gz")
+
+    with open(XML_OUTPUT, 'w', encoding='utf-8') as x:
+        x.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+        x.write('<tv generator-info-name="NovaEPG">\n')
+
+        # Escribir canales
+        for c in all_channels:
+            x.write(f'  <channel id="{c["id"]}">\n')
+            x.write(f'    <display-name>{c["name"]}</display-name>\n')
+            if c["logo"]: x.write(f'    <icon src="{c["logo"]}" />\n')
+            x.write('  </channel>\n')
+
+        # Escribir programas
+        for p in all_programs:
+            # Sanitizar textos para XML
+            def clean(t):
+                return t.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+
+            x.write(f'  <programme start="{p["s"]} +0000" stop="{p["e"]} +0000" channel="{p["cid"]}">\n')
+            x.write(f'    <title lang="es">{clean(p["t"])}</title>\n')
+            if p["d"]: x.write(f'    <desc lang="es">{clean(p["d"])}</desc>\n')
+            x.write('  </programme>\n')
+
+        x.write('</tv>')
+
+    print("📦 Comprimiendo a guide.xml.gz...")
+    with open(XML_OUTPUT, 'rb') as f_in:
+        with gzip.open(GZ_OUTPUT, 'wb') as f_out:
+            f_out.writelines(f_in)
+
+    print(f"✅ Proceso terminado. XML y GZ generados en la raíz.")
 
 if __name__ == "__main__":
     run()
