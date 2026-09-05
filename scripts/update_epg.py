@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 # --- CONFIGURACIÓN ---
 API_FETCH_URL = "https://www.open-epg.com/app/epgfetch.php"
+PLUTO_TV_URL = "https://i.mjh.nz/PlutoTV/all.xml.gz"
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 EPG_DIR = os.path.join(BASE_DIR, "epg")
@@ -132,6 +133,15 @@ def run():
             try: os.remove(path)
             except: pass
 
+    # 2.1 Pluto TV (Externo)
+    print("🎬 Procesando Pluto TV (Externo)...")
+    path_pluto = download_file(PLUTO_TV_URL, "Pluto TV")
+    if path_pluto:
+        c, p = extract_channels_and_programs(path_pluto)
+        sources.append({"name": "PLUTO TV", "channels": c, "programs": p, "age": "Ahora", "is_external": True})
+        try: os.remove(path_pluto)
+        except: pass
+
     # 3. Generar JSONs por separado y Base de Datos de Búsqueda Global
     print("🚀 Generando base de datos de búsqueda y archivos por país...")
 
@@ -188,7 +198,14 @@ def run():
             with open(os.path.join(DATA_DIR, filename), "w", encoding="utf-8") as f:
                 json.dump(country_db, f, separators=(',', ':'), ensure_ascii=False)
 
-            final_countries.append({"name": src['name'], "slug": country_slug, "file": filename, "count": len(country_db), "updated": src['age']})
+            final_countries.append({
+                "name": src['name'],
+                "slug": country_slug,
+                "file": filename,
+                "count": len(country_db),
+                "updated": src['age'],
+                "external": src.get('is_external', False)
+            })
 
     # Guardar índice de países
     final_countries.sort(key=lambda x: x['name'].lower())

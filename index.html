@@ -142,8 +142,9 @@
 
             const filtered = searchData.filter(c =>
                 c.n.toLowerCase().includes(val) ||
-                c.id.toLowerCase().includes(val)
-            ).slice(0, 30);
+                c.id.toLowerCase().includes(val) ||
+                c.c.toLowerCase().includes(val)
+            ).slice(0, 40);
 
             if (filtered.length === 0) {
                 area.innerHTML = '<p style="text-align:center; padding: 50px;">No se encontraron canales.</p>';
@@ -195,6 +196,11 @@
                 }, 1000);
                 alert('Copiado: ' + id);
             });
+        }
+
+        function applyFilter(text) {
+            document.getElementById('mainSearch').value = text;
+            search();
         }
 
         init();
