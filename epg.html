@@ -60,7 +60,7 @@
             document.getElementById('countryIndicator').innerText = country || 'Global';
 
             try {
-                const res = await fetch('../data/epg.json?t=' + Date.now());
+                const res = await fetch('data/epg.json?t=' + Date.now());
                 channels = await res.json();
 
                 // En esta implementación simple, filtramos en el cliente si fuera necesario,

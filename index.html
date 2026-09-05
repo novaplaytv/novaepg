@@ -38,7 +38,7 @@
 
         async function init() {
             try {
-                const res = await fetch('../data/countries.json?t=' + Date.now());
+                const res = await fetch('data/countries.json?t=' + Date.now());
                 allCountries = await res.json();
                 renderCountries(allCountries);
             } catch (e) {
