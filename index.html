@@ -91,6 +91,22 @@
             <input type="text" id="mainSearch" placeholder="Escribe nombre del canal o ID..." oninput="search()">
         </div>
 
+        <!-- Botones de Filtro (Obligatorios) -->
+        <div class="quick-filters" style="display: flex; gap: 10px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap;">
+            <button onclick="applyFilter('')" style="background: var(--input-bg); color: #fff; border: 1px solid var(--border); padding: 10px 20px; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: 800; transition: 0.3s;">
+                <i class="fa-solid fa-globe"></i> TODOS
+            </button>
+            <button onclick="applyFilter('Pluto TV')" style="background: rgba(0, 115, 255, 0.1); color: #0073ff; border: 1px solid #0073ff; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: 800; transition: 0.3s;">
+                <i class="fa-solid fa-play"></i> PLUTO TV
+            </button>
+            <button onclick="applyFilter('TVMAX')" style="background: rgba(229, 9, 20, 0.1); color: var(--primary); border: 1px solid var(--primary); padding: 10px 20px; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: 800; transition: 0.3s;">
+                <i class="fa-solid fa-star"></i> TVMAX
+            </button>
+            <button onclick="applyFilter('NovaSports')" style="background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid #10b981; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-size: 13px; font-weight: 800; transition: 0.3s;">
+                <i class="fa-solid fa-trophy"></i> NOVASPORTS
+            </button>
+        </div>
+
         <div id="resultsArea">
             <!-- Cargado dinámicamente -->
             <div style="text-align: center; padding: 50px; color: var(--text-muted);">
@@ -162,11 +178,13 @@
                 `).join('');
 
                 return `
-                    <div class="channel-result">
+                    <div class="channel-result" style="${c.c === 'Pluto TV' ? 'border-left: 5px solid #0073ff;' : ''}">
                         <img src="${c.l || 'https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp'}" class="ch-logo" onerror="this.src='https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp'">
 
                         <div class="ch-info">
-                            <div class="ch-country">${c.c}</div>
+                            <div class="ch-country" style="${c.c === 'Pluto TV' ? 'color: #0073ff; font-weight: 900;' : ''}">
+                                ${c.c === 'Pluto TV' ? '<i class="fa-solid fa-circle-play"></i> PLUTO TV' : c.c}
+                            </div>
                             <h3>${c.n}</h3>
                             <div class="id-badge" onclick="copyId('${c.id}')">
                                 <i class="fa-regular fa-copy"></i> ${c.id}
