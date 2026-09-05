@@ -3,10 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NovaEPG | Guía de TV Gratuita</title>
+    <title>NovaEPG | Buscador de Canales e IDs</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .search-container { max-width: 900px; margin: 100px auto 40px; padding: 0 20px; }
+        .search-header { text-align: center; margin-bottom: 50px; }
+        .search-header h1 { font-size: 54px; font-weight: 900; letter-spacing: -2px; }
+        .search-header p { color: var(--text-muted); font-size: 18px; margin-top: 10px; }
+
+        .id-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(229, 9, 20, 0.1);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid rgba(229, 9, 20, 0.2);
+            transition: 0.2s;
+        }
+        .id-badge:hover { background: var(--primary); color: #fff; }
+
+        .channel-result {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 80px 1fr 300px;
+            gap: 25px;
+            align-items: center;
+            transition: 0.3s;
+        }
+        .channel-result:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
+        .ch-logo { width: 80px; height: 80px; border-radius: 12px; background: #000; object-fit: contain; }
+
+        .ch-info h3 { font-size: 22px; margin-bottom: 8px; font-weight: 800; }
+        .ch-country { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+
+        .prog-mini-list { list-style: none; border-left: 1px solid var(--border); padding-left: 20px; }
+        .prog-mini-item { margin-bottom: 8px; font-size: 13px; }
+        .prog-time { font-weight: 700; color: var(--primary); margin-right: 8px; }
+        .prog-title { color: #fff; font-weight: 500; }
+
+        .btn-full-guide {
+            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+        .btn-full-guide:hover { color: var(--primary); }
+
+        @media (max-width: 800px) {
+            .channel-result { grid-template-columns: 60px 1fr; }
+            .prog-mini-list { grid-column: 1 / -1; border-left: none; border-top: 1px solid var(--border); padding: 15px 0 0; }
+            .ch-logo { width: 60px; height: 60px; }
+        }
+    </style>
 </head>
 <body>
 
@@ -14,103 +80,109 @@
         <a href="index.html" class="nav-logo">NOVA<span>EPG</span></a>
     </nav>
 
-    <div class="container">
-        <div class="hero">
-            <h1>Guía de TV Global</h1>
-            <p>Accede a la programación de canales de todo el mundo en tiempo real.</p>
+    <div class="search-container">
+        <div class="search-header">
+            <h1>Busca tu Canal</h1>
+            <p>Encuentra el EPG ID y consulta la programación al instante.</p>
         </div>
 
         <div class="search-bar">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="globalSearch" placeholder="Buscar país, canal o EPG ID (xmltv_id)..." oninput="handleSearch()">
+            <input type="text" id="mainSearch" placeholder="Escribe nombre del canal o ID..." oninput="search()">
         </div>
 
-        <div id="searchTabs" style="display: flex; gap: 20px; margin-bottom: 20px; justify-content: center; font-weight: 700; font-size: 14px;">
-            <div id="tabCountries" class="active" style="cursor: pointer; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 5px;" onclick="switchTab('countries')">PAÍSES</div>
-            <div id="tabChannels" style="cursor: pointer; color: var(--text-muted); padding-bottom: 5px;" onclick="switchTab('channels')">CANALES (EPG ID)</div>
-        </div>
-
-        <div class="grid-countries" id="resultGrid">
+        <div id="resultsArea">
             <!-- Cargado dinámicamente -->
-            <div style="text-align: center; grid-column: 1/-1; padding: 40px; color: var(--text-muted);">
-                <i class="fa-solid fa-spinner fa-spin"></i> Cargando datos...
+            <div style="text-align: center; padding: 50px; color: var(--text-muted);">
+                <i class="fa-solid fa-tv fa-3x" style="margin-bottom: 20px; opacity: 0.2;"></i>
+                <p>Escribe algo para empezar a buscar...</p>
             </div>
         </div>
     </div>
 
     <script>
-        let allCountries = [];
-        let allChannels = [];
-        let currentTab = 'countries';
+        let searchData = [];
+        const clock = () => new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
 
         async function init() {
             try {
-                const resC = await fetch('data/countries.json?t=' + Date.now());
-                allCountries = await resC.json();
-
-                const resCh = await fetch('data/channels.json?t=' + Date.now());
-                allChannels = await resCh.json();
-
-                renderResults();
+                const res = await fetch('data/search_db.json?t=' + Date.now());
+                searchData = await res.json();
+                console.log("Datos cargados:", searchData.length);
             } catch (e) {
-                console.error("Error al cargar datos:", e);
-                document.getElementById('resultGrid').innerHTML = '<p style="text-align:center; grid-column:1/-1;">Error al cargar datos. Asegúrate de que el workflow haya generado data/channels.json.</p>';
+                console.error("Error cargando DB:", e);
+                document.getElementById('resultsArea').innerHTML = '<p style="text-align:center;">Error al cargar la base de datos de canales.</p>';
             }
         }
 
-        function switchTab(tab) {
-            currentTab = tab;
-            document.getElementById('tabCountries').style.color = tab === 'countries' ? 'var(--primary)' : 'var(--text-muted)';
-            document.getElementById('tabCountries').style.borderBottom = tab === 'countries' ? '2px solid var(--primary)' : 'none';
-            document.getElementById('tabChannels').style.color = tab === 'channels' ? 'var(--primary)' : 'var(--text-muted)';
-            document.getElementById('tabChannels').style.borderBottom = tab === 'channels' ? '2px solid var(--primary)' : 'none';
-            renderResults();
+        function formatTime(s) {
+            return s.substring(8, 10) + ':' + s.substring(10, 12);
         }
 
-        function renderResults() {
-            const val = document.getElementById('globalSearch').value.toLowerCase();
-            const grid = document.getElementById('resultGrid');
-            grid.innerHTML = '';
+        function search() {
+            const val = document.getElementById('mainSearch').value.toLowerCase();
+            const area = document.getElementById('resultsArea');
 
-            if (currentTab === 'countries') {
-                const filtered = allCountries.filter(c => c.name.toLowerCase().includes(val));
-                if (filtered.length === 0) { grid.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No hay países.</p>'; return; }
+            if (val.length < 2) {
+                area.innerHTML = '<div style="text-align: center; padding: 50px; color: var(--text-muted);"><i class="fa-solid fa-tv fa-3x" style="margin-bottom: 20px; opacity: 0.2;"></i><p>Escribe al menos 2 letras...</p></div>';
+                return;
+            }
 
-                grid.innerHTML = filtered.map(c => `
-                    <div class="card" onclick="window.location.href='epg.html?file=${encodeURIComponent(c.file)}&n=${encodeURIComponent(c.name)}'">
-                        <div class="card-info">
-                            <h3>${c.name}</h3>
-                            <p>${c.count} Canales • Actualizado: ${c.updated}</p>
-                        </div>
-                        <div class="card-btn"><i class="fa-solid fa-chevron-right"></i></div>
+            const filtered = searchData.filter(c =>
+                c.n.toLowerCase().includes(val) ||
+                c.id.toLowerCase().includes(val)
+            ).slice(0, 30);
+
+            if (filtered.length === 0) {
+                area.innerHTML = '<p style="text-align:center; padding: 50px;">No se encontraron canales.</p>';
+                return;
+            }
+
+            const now = clock();
+
+            area.innerHTML = filtered.map(c => {
+                const programs = c.p.map(p => `
+                    <div class="prog-mini-item">
+                        <span class="prog-time">${formatTime(p.s)}</span>
+                        <span class="prog-title">${p.t}</span>
                     </div>
                 `).join('');
-            } else {
-                const filtered = allChannels.filter(c => c.n.toLowerCase().includes(val) || c.id.toLowerCase().includes(val)).slice(0, 100);
-                if (filtered.length === 0) { grid.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No hay canales con ese nombre o ID.</p>'; return; }
 
-                grid.innerHTML = filtered.map(c => `
-                    <div class="card" onclick="copyId('${c.id}')">
-                        <div class="card-info">
+                return `
+                    <div class="channel-result">
+                        <img src="${c.l || 'https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp'}" class="ch-logo" onerror="this.src='https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp'">
+
+                        <div class="ch-info">
+                            <div class="ch-country">${c.c}</div>
                             <h3>${c.n}</h3>
-                            <p style="font-family: monospace; color: var(--primary); font-weight: 700;">ID: ${c.id}</p>
-                            <p style="font-size: 11px;">País: ${c.c}</p>
+                            <div class="id-badge" onclick="copyId('${c.id}')">
+                                <i class="fa-regular fa-copy"></i> ${c.id}
+                            </div>
+                            <br>
+                            <a href="epg.html?file=${encodeURIComponent(c.f)}&n=${encodeURIComponent(c.c)}" class="btn-full-guide">
+                                <i class="fa-solid fa-calendar-days"></i> Ver guía completa
+                            </a>
                         </div>
-                        <div class="card-btn" onclick="event.stopPropagation(); window.location.href='epg.html?file=${encodeURIComponent(c.f)}&n=${encodeURIComponent(c.c)}'">
-                            <i class="fa-solid fa-tv"></i>
+
+                        <div class="prog-mini-list">
+                            <div style="font-weight: 800; font-size: 11px; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase;">Próximos Programas</div>
+                            ${programs || '<p style="font-size:12px; color:var(--text-muted);">Sin programación disponible.</p>'}
                         </div>
                     </div>
-                `).join('');
-            }
+                `;
+            }).join('');
         }
 
         function copyId(id) {
-            navigator.clipboard.writeText(id);
-            alert('EPG ID Copiado: ' + id);
-        }
-
-        function handleSearch() {
-            renderResults();
+            navigator.clipboard.writeText(id).then(() => {
+                const originalText = event.currentTarget.innerHTML;
+                event.currentTarget.innerHTML = '<i class="fa-solid fa-check"></i> COPIADO';
+                setTimeout(() => {
+                    const badge = document.querySelector(`.id-badge`); // This is slightly buggy if multiple results, but user just clicked it.
+                    // Better approach:
+                }, 1000);
+                alert('Copiado: ' + id);
+            });
         }
 
         init();

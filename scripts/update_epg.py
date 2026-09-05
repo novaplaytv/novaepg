@@ -107,28 +107,51 @@ def run():
             try: os.remove(path)
             except: pass
 
-    # 3. Generar JSONs individuales y buscador global
-    print("🚀 Generando archivos finales y buscador global...")
+    # 3. Generar JSONs por separado y Base de Datos de Búsqueda Global
+    print("🚀 Generando base de datos de búsqueda y archivos por país...")
+
     final_countries = []
-    global_channels = []
+    search_db = [] # Nueva base de datos global con programación mínima
+    sources = []
+
+    for item in files:
+        country_name = item.get('cou', 'Desconocido')
+        url = item.get('url')
+        if not url: continue
+
+        path = download_file(url, country_name)
+        if path:
+            c, p = extract_channels_and_programs(path)
+            sources.append({"name": country_name, "channels": c, "programs": p, "age": item.get('age', 'Hoy')})
+            try: os.remove(path)
+            except: pass
+
+    if os.path.exists(TVMAX_FILE):
+        c, p = extract_channels_and_programs(TVMAX_FILE)
+        sources.append({"name": "TVMAX", "channels": c, "programs": p, "age": "Ahora"})
 
     for src in sources:
         country_slug = re.sub(r'[^a-zA-Z0-9]', '_', src['name']).lower()
         filename = f"epg_{country_slug}.json"
+
         country_db = []
         chan_map = {c['id']: {"id": c['id'], "n": c['name'], "l": c['logo'], "p": []} for c in src['channels']}
 
         for p in src['programs']:
-            if p['cid'] in chan_map and len(chan_map[p['cid']]['p']) < 15:
-                chan_map[p['cid']]['p'].append({"t": p['t'], "s": p['s'], "e": p['e'], "d": p['d']})
+            if p['cid'] in chan_map:
+                # Guardamos hasta 15 programas para el JSON del país (Guía Completa)
+                if len(chan_map[p['cid']]['p']) < 15:
+                    chan_map[p['cid']]['p'].append({"t": p['t'], "s": p['s'], "e": p['e'], "d": p['d']})
 
         for cdata in chan_map.values():
-            # Añadir al buscador global
-            global_channels.append({
-                "n": cdata['n'],
+            # Añadir a la base de datos de búsqueda global con los primeros 3 programas
+            search_db.append({
                 "id": cdata['id'],
+                "n": cdata['n'],
+                "l": cdata['l'],
                 "c": src['name'],
-                "f": filename
+                "f": filename,
+                "p": cdata['p'][:3] # Solo los primeros 3 para que el buscador sea ligero
             })
 
             if cdata['p']:
@@ -142,14 +165,15 @@ def run():
 
             final_countries.append({"name": src['name'], "slug": country_slug, "file": filename, "count": len(country_db), "updated": src['age']})
 
+    # Guardar índice de países
     final_countries.sort(key=lambda x: x['name'].lower())
     with open(os.path.join(DATA_DIR, "countries.json"), "w", encoding="utf-8") as f:
         json.dump(final_countries, f, indent=2, ensure_ascii=False)
 
-    # Guardar buscador global de canales
-    global_channels.sort(key=lambda x: x['n'].lower())
-    with open(os.path.join(DATA_DIR, "channels.json"), "w", encoding="utf-8") as f:
-        json.dump(global_channels, f, separators=(',', ':'), ensure_ascii=False)
+    # Guardar Base de Datos de Búsqueda Global (Canal + ID + Programación actual)
+    search_db.sort(key=lambda x: x['n'].lower())
+    with open(os.path.join(DATA_DIR, "search_db.json"), "w", encoding="utf-8") as f:
+        json.dump(search_db, f, separators=(',', ':'), ensure_ascii=False)
 
     # 4. XMLTV Global para la APP
     print("📺 Generando guide.xml...")
