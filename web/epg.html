@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaEPG | Guía de TV en Vivo</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body style="overflow: hidden;">
+
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">NOVA<span>EPG</span></a>
+        <div style="margin-left: 30px; font-weight: 700; font-size: 14px; opacity: 0.6;" id="countryIndicator">Cargando...</div>
+    </nav>
+
+    <div class="epg-layout">
+        <div class="epg-controls">
+            <div class="search-bar" style="margin: 0; flex: 1; max-width: 400px;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="channelSearch" placeholder="Filtrar canales..." oninput="renderGrid()">
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 13px;">
+                <i class="fa-solid fa-clock"></i>
+                <span id="currentTime">--:--</span>
+            </div>
+        </div>
+
+        <div class="epg-grid-container" id="gridContainer">
+            <!-- Cabecera -->
+            <div class="epg-header" id="timeHeader">
+                <div class="channel-col-header">CANALES</div>
+                <div class="timeline" id="timelineHeader"></div>
+            </div>
+
+            <!-- Datos -->
+            <div id="epgBody"></div>
+        </div>
+    </div>
+
+    <!-- Modal Detalle -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+            <h2 id="mTitle">Título del Programa</h2>
+            <p id="mTime" style="color: var(--primary); font-weight: 700; font-size: 14px;"></p>
+            <p id="mDesc"></p>
+        </div>
+    </div>
+
+    <script>
+        const PX_PER_HOUR = 300;
+        let channels = [];
+        let filtered = [];
+
+        async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const country = urlParams.get('c');
+            document.getElementById('countryIndicator').innerText = country || 'Global';
+
+            try {
+                const res = await fetch('../data/epg.json?t=' + Date.now());
+                channels = await res.json();
+
+                // En esta implementación simple, filtramos en el cliente si fuera necesario,
+                // pero epg.json ya está consolidado.
+                renderGrid();
+                updateClock();
+                setInterval(updateClock, 10000);
+            } catch (e) {
+                console.error("Error cargando EPG:", e);
+            }
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('currentTime').innerText = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+        }
+
+        function parseEpgDate(s) {
+            return new Date(
+                s.substring(0, 4),
+                parseInt(s.substring(4, 6)) - 1,
+                s.substring(6, 8),
+                s.substring(8, 10),
+                s.substring(10, 12),
+                s.substring(12, 14)
+            );
+        }
+
+        function formatTime(d) {
+            return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+        }
+
+        function renderGrid() {
+            const search = document.getElementById('channelSearch').value.toLowerCase();
+            filtered = channels.filter(c => c.n.toLowerCase().includes(search));
+
+            const header = document.getElementById('timelineHeader');
+            const body = document.getElementById('epgBody');
+
+            // 1. Cabecera de tiempo (Próximas 12 horas)
+            const now = new Date();
+            now.setMinutes(0,0,0);
+
+            header.innerHTML = '';
+            for(let i=0; i<12; i++) {
+                const h = new Date(now.getTime() + i * 3600000);
+                header.innerHTML += `<div class="time-marker">${formatTime(h)}</div>`;
+            }
+
+            // 2. Filas
+            const startTime = now.getTime();
+            const nowFull = new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
+
+            body.innerHTML = filtered.map(c => {
+                const programs = c.p.map(p => {
+                    const start = parseEpgDate(p.s);
+                    const end = parseEpgDate(p.e);
+
+                    const durationMin = (end.getTime() - start.getTime()) / 60000;
+                    const width = (durationMin / 60) * PX_PER_HOUR;
+
+                    const offsetMin = (start.getTime() - startTime) / 60000;
+                    const left = (offsetMin / 60) * PX_PER_HOUR;
+
+                    // Solo renderizar si entra en el view (12 horas)
+                    if (left + width < 0 || left > 12 * PX_PER_HOUR) return '';
+
+                    const isActive = nowFull >= p.s && nowFull < p.e;
+
+                    return `
+                        <div class="program-item ${isActive ? 'active' : ''}"
+                             style="width: ${width}px; left: ${left}px;"
+                             onclick="showDetails('${p.t.replace(/'/g, "\\'")}', '${formatTime(start)} - ${formatTime(end)}', '${(p.d || '').replace(/'/g, "\\'")}')">
+                            <div class="p-title">${p.t}</div>
+                            <div class="p-time">${formatTime(start)}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="epg-row">
+                        <div class="channel-cell">
+                            <img src="${c.l || 'https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp'}" onerror="this.src='https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp'">
+                            <div class="channel-name">${c.n}</div>
+                        </div>
+                        <div class="program-list">
+                            ${programs}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showDetails(t, time, d) {
+            document.getElementById('mTitle').innerText = t;
+            document.getElementById('mTime').innerText = time;
+            document.getElementById('mDesc').innerText = d || 'Sin descripción adicional.';
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+        }
+
+        init();
+    </script>
+</body>
+</html>

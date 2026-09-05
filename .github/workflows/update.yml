@@ -1,0 +1,36 @@
+name: Actualizar EPG Diariamente
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Instalar Dependencias
+        run: pip install requests
+
+      - name: Ejecutar Actualización EPG
+        run: python scripts/update_epg.py
+
+      - name: Commit y Push de Datos
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/epg.json data/countries.json
+          git commit -m "EPG: Actualización automática diaria" || echo "Sin cambios para commitear"
+          git push

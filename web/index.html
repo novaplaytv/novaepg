@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaEPG | Guía de TV Gratuita</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="nav-logo">NOVA<span>EPG</span></a>
+    </nav>
+
+    <div class="container">
+        <div class="hero">
+            <h1>Guía de TV Global</h1>
+            <p>Accede a la programación de canales de todo el mundo en tiempo real.</p>
+        </div>
+
+        <div class="search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="countrySearch" placeholder="Buscar país o región..." oninput="filterCountries()">
+        </div>
+
+        <div class="grid-countries" id="countryGrid">
+            <!-- Cargado dinámicamente -->
+            <div style="text-align: center; grid-column: 1/-1; padding: 40px; color: var(--text-muted);">
+                <i class="fa-solid fa-spinner fa-spin"></i> Cargando directorio...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allCountries = [];
+
+        async function init() {
+            try {
+                const res = await fetch('../data/countries.json?t=' + Date.now());
+                allCountries = await res.json();
+                renderCountries(allCountries);
+            } catch (e) {
+                console.error("Error al cargar países:", e);
+                document.getElementById('countryGrid').innerHTML = '<p style="text-align:center; grid-column:1/-1;">Error al cargar datos. Asegúrate de que el script de generación haya corrido.</p>';
+            }
+        }
+
+        function renderCountries(list) {
+            const grid = document.getElementById('countryGrid');
+            if (list.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No se encontraron resultados.</p>';
+                return;
+            }
+
+            grid.innerHTML = list.map(c => `
+                <div class="card" onclick="window.location.href='epg.html?c=${encodeURIComponent(c.name)}'">
+                    <div class="card-info">
+                        <h3>${c.name}</h3>
+                        <p>${c.count} Canales • Actualizado: ${c.updated}</p>
+                    </div>
+                    <div class="card-btn">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCountries() {
+            const val = document.getElementById('countrySearch').value.toLowerCase();
+            const filtered = allCountries.filter(c => c.name.toLowerCase().includes(val));
+            renderCountries(filtered);
+        }
+
+        init();
+    </script>
+</body>
+</html>
