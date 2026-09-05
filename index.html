@@ -55,7 +55,7 @@
             }
 
             grid.innerHTML = list.map(c => `
-                <div class="card" onclick="window.location.href='epg.html?c=${encodeURIComponent(c.name)}'">
+                <div class="card" onclick="window.location.href='epg.html?file=${encodeURIComponent(c.file)}&n=${encodeURIComponent(c.name)}'">
                     <div class="card-info">
                         <h3>${c.name}</h3>
                         <p>${c.count} Canales • Actualizado: ${c.updated}</p>

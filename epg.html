@@ -56,15 +56,21 @@
 
         async function init() {
             const urlParams = new URLSearchParams(window.location.search);
-            const country = urlParams.get('c');
-            document.getElementById('countryIndicator').innerText = country || 'Global';
+            const file = urlParams.get('file');
+            const name = urlParams.get('n');
+
+            document.getElementById('countryIndicator').innerText = name || 'Global';
+
+            if (!file) {
+                alert("No se especificó un archivo de datos.");
+                window.location.href = 'index.html';
+                return;
+            }
 
             try {
-                const res = await fetch('data/epg.json?t=' + Date.now());
+                const res = await fetch('data/' + file + '?t=' + Date.now());
                 channels = await res.json();
 
-                // En esta implementación simple, filtramos en el cliente si fuera necesario,
-                // pero epg.json ya está consolidado.
                 renderGrid();
                 updateClock();
                 setInterval(updateClock, 10000);

@@ -140,49 +140,61 @@ def run():
             try: os.remove(path)
             except: pass
 
-    # 3. Generar JSON optimizado para WEB
-    print("🚀 Generando archivos para WEB y APP...")
+    # 3. Generar JSONs por separado por cada país
+    print("🚀 Generando JSONs individuales por país...")
 
-    # Agrupar programas por canal
-    db = {}
-    for c in all_channels:
-        db[c['id']] = {
-            "n": c['name'],
-            "l": c['logo'],
-            "p": []
-        }
+    final_countries = []
+    sources = []
 
-    for p in all_programs:
-        if p['cid'] in db:
-            # Solo guardamos los próximos 5 programas para ligereza
-            if len(db[p['cid']]['p']) < 8:
-                db[p['cid']]['p'].append({
-                    "t": p['t'],
-                    "s": p['s'],
-                    "e": p['e'],
-                    "d": p['d']
-                })
+    for item in files:
+        country_name = item.get('cou', 'Desconocido')
+        url = item.get('url')
+        if not url: continue
 
-    # Convertir a lista y ordenar
-    final_list = []
-    for cid, data in db.items():
-        if data['p']:
-            data['p'].sort(key=lambda x: x['s'])
-            final_list.append({
-                "id": cid,
-                "n": data['n'],
-                "l": data['l'],
-                "p": data['p']
+        path = download_file(url, country_name)
+        if path:
+            c, p = extract_channels_and_programs(path)
+            sources.append({"name": country_name, "channels": c, "programs": p, "age": item.get('age', 'Hoy')})
+            try: os.remove(path)
+            except: pass
+
+    if os.path.exists(TVMAX_FILE):
+        c, p = extract_channels_and_programs(TVMAX_FILE)
+        sources.append({"name": "TVMAX", "channels": c, "programs": p, "age": "Ahora"})
+
+    for src in sources:
+        country_slug = re.sub(r'[^a-zA-Z0-9]', '_', src['name']).lower()
+        filename = f"epg_{country_slug}.json"
+
+        country_db = []
+        chan_map = {c['id']: {"id": c['id'], "n": c['name'], "l": c['logo'], "p": []} for c in src['channels']}
+
+        for p in src['programs']:
+            if p['cid'] in chan_map:
+                if len(chan_map[p['cid']]['p']) < 15:
+                    chan_map[p['cid']]['p'].append({"t": p['t'], "s": p['s'], "e": p['e'], "d": p['d']})
+
+        for cdata in chan_map.values():
+            if cdata['p']:
+                cdata['p'].sort(key=lambda x: x['s'])
+                country_db.append(cdata)
+
+        if country_db:
+            country_db.sort(key=lambda x: x['n'].lower())
+            with open(os.path.join(DATA_DIR, filename), "w", encoding="utf-8") as f:
+                json.dump(country_db, f, separators=(',', ':'), ensure_ascii=False)
+
+            final_countries.append({
+                "name": src['name'],
+                "slug": country_slug,
+                "file": filename,
+                "count": len(country_db),
+                "updated": src['age']
             })
 
-    final_list.sort(key=lambda x: x['n'].lower())
-
-    # Guardar archivos
-    with open(os.path.join(DATA_DIR, "epg.json"), "w", encoding="utf-8") as f:
-        json.dump(final_list, f, separators=(',', ':'), ensure_ascii=False)
-
+    final_countries.sort(key=lambda x: x['name'].lower())
     with open(os.path.join(DATA_DIR, "countries.json"), "w", encoding="utf-8") as f:
-        json.dump(countries_data, f, indent=2, ensure_ascii=False)
+        json.dump(final_countries, f, indent=2, ensure_ascii=False)
 
     # 4. GENERAR XMLTV PARA LA APP (guide.xml y guide.xml.gz)
     print("📺 Generando guide.xml para la APP...")
@@ -196,23 +208,21 @@ def run():
         x.write('<?xml version="1.0" encoding="UTF-8"?>\n')
         x.write('<tv generator-info-name="NovaEPG">\n')
 
-        # Escribir canales
-        for c in all_channels:
-            x.write(f'  <channel id="{c["id"]}">\n')
-            x.write(f'    <display-name>{c["name"]}</display-name>\n')
-            if c["logo"]: x.write(f'    <icon src="{c["logo"]}" />\n')
-            x.write('  </channel>\n')
+        for src in sources:
+            for c in src['channels']:
+                x.write(f'  <channel id="{c["id"]}">\n')
+                x.write(f'    <display-name>{c["name"]}</display-name>\n')
+                if c["logo"]: x.write(f'    <icon src="{c["logo"]}" />\n')
+                x.write('  </channel>\n')
 
-        # Escribir programas
-        for p in all_programs:
-            # Sanitizar textos para XML
-            def clean(t):
-                return t.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
-
-            x.write(f'  <programme start="{p["s"]} +0000" stop="{p["e"]} +0000" channel="{p["cid"]}">\n')
-            x.write(f'    <title lang="es">{clean(p["t"])}</title>\n')
-            if p["d"]: x.write(f'    <desc lang="es">{clean(p["d"])}</desc>\n')
-            x.write('  </programme>\n')
+        for src in sources:
+            for p in src['programs']:
+                def clean(t):
+                    return t.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+                x.write(f'  <programme start="{p["s"]} +0000" stop="{p["e"]} +0000" channel="{p["cid"]}">\n')
+                x.write(f'    <title lang="es">{clean(p["t"])}</title>\n')
+                if p["d"]: x.write(f'    <desc lang="es">{clean(p["d"])}</desc>\n')
+                x.write('  </programme>\n')
 
         x.write('</tv>')
 
