@@ -31,6 +31,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add data/epg.json data/countries.json guide.xml guide.xml.gz
+          git add data/epg.json data/countries.json epg/guide.xml epg/guide.xml.gz
           git commit -m "EPG: Actualización automática diaria (Web + App)" || echo "Sin cambios para commitear"
           git push

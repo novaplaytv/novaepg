@@ -186,8 +186,11 @@ def run():
 
     # 4. GENERAR XMLTV PARA LA APP (guide.xml y guide.xml.gz)
     print("📺 Generando guide.xml para la APP...")
-    XML_OUTPUT = os.path.join(BASE_DIR, "guide.xml")
-    GZ_OUTPUT = os.path.join(BASE_DIR, "guide.xml.gz")
+    EPG_DIR = os.path.join(BASE_DIR, "epg")
+    os.makedirs(EPG_DIR, exist_ok=True)
+
+    XML_OUTPUT = os.path.join(EPG_DIR, "guide.xml")
+    GZ_OUTPUT = os.path.join(EPG_DIR, "guide.xml.gz")
 
     with open(XML_OUTPUT, 'w', encoding='utf-8') as x:
         x.write('<?xml version="1.0" encoding="UTF-8"?>\n')
