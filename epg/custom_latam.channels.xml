@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<channels>
+  <!-- Paraguay - mi.tv -->
+  <channel site="mi.tv" lang="es" xmltv_id="py#tigo-sports" site_id="py#tigo-sports">Tigo Sports</channel>
+  <channel site="mi.tv" lang="es" xmltv_id="py#tigo-sports-2" site_id="py#tigo-sports-2">Tigo Sports 2</channel>
+  <channel site="mi.tv" lang="es" xmltv_id="py#tigo-sports-3" site_id="py#tigo-sports-3">Tigo Sports 3</channel>
+  <channel site="mi.tv" lang="es" xmltv_id="py#tigo-sports-plus" site_id="py#tigo-sports-plus">Tigo Sports +</channel>
+  <channel site="mi.tv" lang="es" xmltv_id="py#tigo-max" site_id="py#tigo-max">Tigo Max</channel>
+  <channel site="mi.tv" lang="es" xmltv_id="py#canal-100" site_id="py#canal-100">Canal 100</channel>
+  <channel site="mi.tv" lang="es" xmltv_id="py#universo-970" site_id="py#universo-970">Universo 970</channel>
+  <channel site="mi.tv" lang="es" xmltv_id="py#tvs" site_id="py#tvs">TVS</channel>
+
+  <!-- Canales de Paraguay - GatoTV (Rastreo Real Diario) -->
+  <channel site="gatotv.com" lang="es" xmltv_id="py#canal-13" site_id="13_de_paraguay">Trece</channel>
+  <channel site="gatotv.com" lang="es" xmltv_id="py#unicanal" site_id="unicanal">Unicanal</channel>
+  <channel site="gatotv.com" lang="es" xmltv_id="ESPN.py" site_id="espn_paraguay">ESPN Paraguay</channel>
+  <channel site="gatotv.com" lang="es" xmltv_id="ESPN2.py" site_id="espn_2_paraguay">ESPN 2 Paraguay</channel>
+
+  <!-- Argentina - mi.tv -->
+  <channel site="mi.tv" lang="es" xmltv_id="ar#espn-premium" site_id="ar#espn-premium">ESPN Premium</channel>
+  <channel site="mi.tv" lang="es" xmltv_id="ar#tnt-sports" site_id="ar#tnt-sports">TNT Sports</channel>
+</channels>

@@ -1,0 +1,104 @@
+name: Generar EPG NovaPlay
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch: 
+
+permissions:
+  contents: write
+
+jobs:
+  grab-epg:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout novaimg
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Instalar Dependencias Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Instalar grabber de iptv-org
+        run: |
+          git clone --depth 1 https://github.com/iptv-org/epg.git grabber
+          cd grabber
+          npm install
+
+      - name: Generar Guía (Latam & Caribe)
+        continue-on-error: true
+        run: |
+          cd grabber
+          # 1. Grabamos primero nuestros canales personalizados prioritarios (Tigo Sports, etc.)
+          # v95: Silenciamos errores de JSON ( Unexpected token '<' ) mediante redirección y chequeo de salida
+          npm run grab -- --channels=../epg/custom_latam.channels.xml --maxConnections=5 --timeout=10000 --output=../epg/custom.xml || echo "Aviso: El grabber custom tuvo algunos fallos, pero continuamos..."
+          
+          # 2. Grabamos el resto de la región desde los sitios oficiales
+          npm run grab -- --sites=mi.tv,gatotv.com,directv.com.ar,reportv.com.ar,programacion.tcc.com.uy,directv.com.uy,tv.movistar.com.pe,tv.movistar.co,claro.com.co --maxConnections=5 --timeout=10000 --output=../epg/sites.xml || echo "Aviso: Fallos menores en algunos sitios. Ignorando JSON inválidos..."
+
+      - name: Fusionar y Comprimir
+        run: |
+          # Unir los archivos XML en uno solo oficial (guide.xml) con validación de cierre (v82)
+          python - <<'PY'
+          import os
+          files = ['epg/custom.xml', 'epg/sites.xml']
+          output = 'epg/guide.xml'
+          
+          def merge_xml():
+              with open(output, 'w', encoding='utf-8') as f:
+                  f.write('<?xml version="1.0" encoding="UTF-8" ?>\n<tv>')
+                  for fn in files:
+                      if os.path.exists(fn) and os.path.getsize(fn) > 100:
+                          print(f"Fusionando {fn}...")
+                          with open(fn, 'r', encoding='utf-8') as inf:
+                              content = inf.read()
+                              # Extraer solo el contenido entre <tv...> y </tv>
+                              start = content.find('>') + 1
+                              if '<tv' in content[:start]:
+                                  start = content.find('>', content.find('<tv')) + 1
+                              end = content.rfind('</tv>')
+                              if start > 0 and end > start:
+                                  f.write(content[start:end])
+                      else:
+                          print(f"Saltando {fn} (archivo inexistente o corrupto)")
+                  f.write('\n</tv>')
+          
+          merge_xml()
+          PY
+          
+          ls -lh epg/guide.xml
+          gzip -c epg/guide.xml > epg/guide.xml.gz
+
+      - name: Optimizar Base de Datos de Búsqueda
+        run: python scripts/generar_db_epg.py
+
+      - name: Guardar en repositorio
+        run: |
+          git config user.name "NovaEPG Bot"
+          git config user.email "nova-epg@users.noreply.github.com"
+          
+          # FASE REPARACIÓN (v83): Sincronización previa al push para evitar rechazos
+          git fetch origin main
+          git reset --soft origin/main
+          
+          git add epg/guide.xml epg/guide.xml.gz epg-search/epg_db.json
+          
+          if git diff --cached --quiet; then
+            echo "Sin cambios detectados."
+          else
+            git commit -m "EPG & Search: Actualización automática (v81)"
+            # Re-intentar push con pull previo si falla
+            git push || (git pull --rebase origin main && git push)
+          fi

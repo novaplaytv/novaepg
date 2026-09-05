@@ -1,0 +1,36 @@
+name: Actualizar Guías NovaEPG (Masivo)
+
+on:
+  schedule:
+    - cron: '0 5 * * *' # Todos los días a las 01:00 AM PY (UTC-4 -> UTC-3)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-epg:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Ejecutar motor de actualización masiva
+        run: python scripts/update_novaepg.py
+
+      - name: Commit y Push
+        run: |
+          git config user.name "NovaEPG Bot"
+          git config user.email "nova-epg@users.noreply.github.com"
+          git add novaepg/
+          if git diff --cached --quiet; then
+            echo "Sin cambios en la programación."
+          else
+            git commit -m "EPG: Actualización masiva de guías perpetuas (Trece, TVMax...)"
+            git push
+          fi

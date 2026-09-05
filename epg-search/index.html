@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPG ID SEARCH | NOVAPLAY</title>
+    <link rel="icon" type="image/webp" href="https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e50914;
+            --bg: #080a10;
+            --card-bg: #11151f;
+            --input-bg: #1a1f2e;
+            --text: #ffffff;
+            --text-muted: #9aa3b2;
+            --border: rgba(255,255,255,0.05);
+            --success: #10b981;
+            --warning: #ffbb00;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; padding: 40px 20px; }
+
+        .container { max-width: 900px; margin: auto; }
+
+        header { text-align: center; margin-bottom: 40px; }
+        h1 { font-size: 32px; font-weight: 900; letter-spacing: -1px; margin-bottom: 10px; }
+        p.subtitle { color: var(--text-muted); font-size: 15px; }
+
+        .search-container { display: flex; gap: 15px; margin-bottom: 30px; }
+        .search-wrapper { position: relative; flex-grow: 1; }
+        .search-wrapper i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--primary); font-size: 18px; }
+        #searchInput { width: 100%; padding: 20px 20px 20px 60px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; color: #fff; font-size: 16px; transition: 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        #searchInput:focus { border-color: var(--primary); outline: none; background: #161b29; box-shadow: 0 15px 40px rgba(229, 9, 20, 0.15); }
+
+        #countryFilter { padding: 0 20px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; min-width: 180px; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 15px center; background-size: 20px; }
+
+        .results-count { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 15px; text-align: center; }
+
+        .channel-list { display: grid; gap: 12px; }
+        .channel-item { background: var(--card-bg); border: 1px solid var(--border); padding: 20px; border-radius: 18px; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
+        .channel-item:hover { border-color: var(--primary); transform: translateX(5px); }
+
+        .ch-info { display: flex; align-items: center; gap: 15px; overflow: hidden; flex-grow: 1; }
+        .ch-logo { width: 45px; height: 45px; background: #000; border-radius: 10px; object-fit: contain; border: 1px solid var(--border); }
+        .ch-details { overflow: hidden; flex-grow: 1; }
+        .ch-name { font-weight: 800; font-size: 15px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ch-country { font-size: 10px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .ch-live { font-size: 12px; font-weight: 700; color: var(--success); display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+        .ch-next { font-size: 11px; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+        .live-dot-mini { width: 6px; height: 6px; background: var(--success); border-radius: 50%; box-shadow: 0 0 5px var(--success); animation: blink 1s infinite; }
+        .next-dot-mini { width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%; opacity: 0.5; }
+
+        .ch-actions { display: flex; align-items: center; gap: 10px; }
+        .epg-id-badge { background: var(--input-bg); padding: 10px 15px; border-radius: 10px; font-family: monospace; font-size: 13px; color: var(--success); font-weight: bold; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .btn-copy { background: var(--primary); color: #fff; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 800; transition: 0.2s; }
+
+        .loader { text-align: center; padding: 60px; }
+        .loader i { font-size: 40px; color: var(--primary); }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @media (max-width: 600px) { .search-container { flex-direction: column; } #countryFilter { padding: 15px 20px; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <img src="https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp" width="60" style="margin-bottom: 20px;">
+        <h1>EPG ID Finder</h1>
+        <p class="subtitle">Busca y copia el ID exacto para la guía de programación de NovaPlay</p>
+    </header>
+
+    <div class="search-container">
+        <div class="search-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Escribe el nombre del canal (ej: HBO, ESPN...)" disabled>
+        </div>
+        <select id="countryFilter" disabled>
+            <option value="">🌎 TODOS LOS PAÍSES</option>
+        </select>
+    </div>
+
+    <div id="loader" class="loader">
+        <i class="fas fa-circle-notch fa-spin"></i>
+        <p style="margin-top: 20px; font-weight: 700; color: var(--text-muted);">Sincronizando Base de Datos...</p>
+    </div>
+
+    <div id="resultsInfo" class="results-count" style="display: none;"></div>
+    <div id="channelList" class="channel-list"></div>
+</div>
+
+<script>
+    const EPG_DB_URL = 'epg_db.json';
+    let epgDatabase = [];
+
+    async function init() {
+        try {
+            const resp = await fetch(EPG_DB_URL + '?t=' + Date.now());
+            if (!resp.ok) throw new Error("Base de datos no encontrada");
+            epgDatabase = await resp.json();
+
+            const info = document.getElementById('resultsInfo');
+            info.style.display = 'block';
+            info.innerHTML = `📡 Datos Sincronizados: <b>${new Date().toLocaleDateString()}</b> | Total: ${epgDatabase.length} canales`;
+
+            const countries = [...new Set(epgDatabase.map(ch => ch.country))].sort();
+            const filter = document.getElementById('countryFilter');
+            countries.forEach(c => {
+                if (!c) return;
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c.toUpperCase();
+                filter.appendChild(opt);
+            });
+
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('searchInput').disabled = false;
+            document.getElementById('countryFilter').disabled = false;
+            document.getElementById('searchInput').focus();
+        } catch (e) {
+            console.error(e);
+            alert('Error cargando la base de datos.');
+        }
+    }
+
+    function search() {
+        const query = document.getElementById('searchInput').value.toLowerCase().trim();
+        const country = document.getElementById('countryFilter').value;
+        const listContainer = document.getElementById('channelList');
+
+        if (query.length < 2 && !country) {
+            listContainer.innerHTML = '';
+            return;
+        }
+
+        const now = new Date();
+        const nowStr = now.getUTCFullYear().toString() + (now.getUTCMonth() + 1).toString().padStart(2, '0') + now.getUTCDate().toString().padStart(2, '0') + now.getUTCHours().toString().padStart(2, '0') + now.getUTCMinutes().toString().padStart(2, '0') + now.getUTCSeconds().toString().padStart(2, '0');
+
+        const filtered = epgDatabase.filter(ch => {
+            const matchesQuery = !query || ch.name.toLowerCase().includes(query) || ch.id.toLowerCase().includes(query);
+            const matchesCountry = !country || ch.country === country;
+            return matchesQuery && matchesCountry;
+        }).slice(0, 100);
+
+        listContainer.innerHTML = filtered.map(ch => {
+            let currentProg = "Prog. no disponible (Hoy)";
+            let nextProg = "";
+            let statusStyle = "background:#666; box-shadow:none; animation:none;";
+            let textStyle = "color:var(--text-muted)";
+
+            if (ch.progs && ch.progs.length > 0) {
+                const currentIndex = ch.progs.findIndex(p => nowStr >= p[1] && nowStr < p[2]);
+
+                if (currentIndex !== -1) {
+                    currentProg = ch.progs[currentIndex][0];
+                    statusStyle = "";
+                    textStyle = "";
+
+                    if (currentIndex + 1 < ch.progs.length) {
+                        const next = ch.progs[currentIndex + 1];
+                        const timeStr = next[1].slice(8, 10) + ":" + next[1].slice(10, 12);
+                        nextProg = `LO QUE SIGUE: <b>${next[0]}</b> (${timeStr})`;
+                    }
+                } else {
+                    const nextIndex = ch.progs.findIndex(p => p[1] > nowStr);
+                    if (nextIndex !== -1) {
+                        const next = ch.progs[nextIndex];
+                        currentProg = "Próximamente: " + next[0];
+                        statusStyle = "background:var(--warning); box-shadow:0 0 5px var(--warning);";
+                        textStyle = "color:var(--warning)";
+
+                        if (nextIndex + 1 < ch.progs.length) {
+                            const afterNext = ch.progs[nextIndex + 1];
+                            const timeStr = afterNext[1].slice(8, 10) + ":" + afterNext[1].slice(10, 12);
+                            nextProg = `Y LUEGO: <b>${afterNext[0]}</b> (${timeStr})`;
+                        }
+                    }
+                }
+            }
+
+            return `
+                <div class="channel-item">
+                    <div class="ch-info">
+                        <img class="ch-logo" src="${ch.logo || 'https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp'}" onerror="this.src='https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp'">
+                        <div class="ch-details">
+                            <div class="ch-name">${ch.name}</div>
+                            <div class="ch-country">${ch.country} | Fuente: <b>${ch.site}</b></div>
+                            <div class="ch-live">
+                                <span class="live-dot-mini" style="${statusStyle}"></span>
+                                <span style="${textStyle}">EN VIVO: ${currentProg}</span>
+                            </div>
+                            ${nextProg ? `<div class="ch-next"><span class="next-dot-mini"></span><span>${nextProg}</span></div>` : ''}
+                        </div>
+                    </div>
+                    <div class="ch-actions">
+                        <div class="epg-id-badge">${ch.id}</div>
+                        <button class="btn-copy" onclick="copyId('${ch.id}', this)">COPIAR ID</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function copyId(id, btn) {
+        navigator.clipboard.writeText(id).then(() => {
+            const originalText = btn.innerText;
+            btn.innerText = '¡COPIADO!';
+            btn.style.background = '#10b981';
+            setTimeout(() => { btn.innerText = originalText; btn.style.background = ''; }, 1500);
+        });
+    }
+
+    document.getElementById('searchInput').oninput = search;
+    document.getElementById('countryFilter').onchange = search;
+    init();
+</script>
+</body>
+</html>
