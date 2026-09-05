@@ -13,6 +13,7 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 EPG_DIR = os.path.join(BASE_DIR, "epg")
 TEMP_DIR = os.path.join(DATA_DIR, "temp")
 TVMAX_FILE = os.path.join(BASE_DIR, "novaepg/tvmax/tvmax.xml")
+NOVASPORTS_FILE = os.path.join(BASE_DIR, "novaepg/novasports/novasports.xml")
 
 def parse_time(t_str):
     if not t_str: return None
@@ -88,11 +89,16 @@ def run():
 
     sources = []
 
-    # 1. TVMAX (Excepción)
+    # 1. TVMAX y NOVASPORTS (Excepciones)
     if os.path.exists(TVMAX_FILE):
-        print("💎 Procesando TVMAX (Excepción)...")
+        print("💎 Procesando TVMAX...")
         c, p = extract_channels_and_programs(TVMAX_FILE)
         sources.append({"name": "TVMAX", "channels": c, "programs": p, "age": "Ahora"})
+
+    if os.path.exists(NOVASPORTS_FILE):
+        print("⚽ Procesando NOVASPORTS...")
+        c, p = extract_channels_and_programs(NOVASPORTS_FILE)
+        sources.append({"name": "NOVASPORTS", "channels": c, "programs": p, "age": "24/7"})
 
     # 2. Open-EPG
     for item in files:
