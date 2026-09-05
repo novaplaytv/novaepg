@@ -20,6 +20,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
+          cache: 'pip' # Habilitar caché nativa de dependencias
 
       - name: Instalar Dependencias
         run: pip install requests
