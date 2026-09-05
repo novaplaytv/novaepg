@@ -22,55 +22,95 @@
 
         <div class="search-bar">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="countrySearch" placeholder="Buscar país o región..." oninput="filterCountries()">
+            <input type="text" id="globalSearch" placeholder="Buscar país, canal o EPG ID (xmltv_id)..." oninput="handleSearch()">
         </div>
 
-        <div class="grid-countries" id="countryGrid">
+        <div id="searchTabs" style="display: flex; gap: 20px; margin-bottom: 20px; justify-content: center; font-weight: 700; font-size: 14px;">
+            <div id="tabCountries" class="active" style="cursor: pointer; color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 5px;" onclick="switchTab('countries')">PAÍSES</div>
+            <div id="tabChannels" style="cursor: pointer; color: var(--text-muted); padding-bottom: 5px;" onclick="switchTab('channels')">CANALES (EPG ID)</div>
+        </div>
+
+        <div class="grid-countries" id="resultGrid">
             <!-- Cargado dinámicamente -->
             <div style="text-align: center; grid-column: 1/-1; padding: 40px; color: var(--text-muted);">
-                <i class="fa-solid fa-spinner fa-spin"></i> Cargando directorio...
+                <i class="fa-solid fa-spinner fa-spin"></i> Cargando datos...
             </div>
         </div>
     </div>
 
     <script>
         let allCountries = [];
+        let allChannels = [];
+        let currentTab = 'countries';
 
         async function init() {
             try {
-                const res = await fetch('data/countries.json?t=' + Date.now());
-                allCountries = await res.json();
-                renderCountries(allCountries);
+                const resC = await fetch('data/countries.json?t=' + Date.now());
+                allCountries = await resC.json();
+
+                const resCh = await fetch('data/channels.json?t=' + Date.now());
+                allChannels = await resCh.json();
+
+                renderResults();
             } catch (e) {
-                console.error("Error al cargar países:", e);
-                document.getElementById('countryGrid').innerHTML = '<p style="text-align:center; grid-column:1/-1;">Error al cargar datos. Asegúrate de que el script de generación haya corrido.</p>';
+                console.error("Error al cargar datos:", e);
+                document.getElementById('resultGrid').innerHTML = '<p style="text-align:center; grid-column:1/-1;">Error al cargar datos. Asegúrate de que el workflow haya generado data/channels.json.</p>';
             }
         }
 
-        function renderCountries(list) {
-            const grid = document.getElementById('countryGrid');
-            if (list.length === 0) {
-                grid.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No se encontraron resultados.</p>';
-                return;
-            }
-
-            grid.innerHTML = list.map(c => `
-                <div class="card" onclick="window.location.href='epg.html?file=${encodeURIComponent(c.file)}&n=${encodeURIComponent(c.name)}'">
-                    <div class="card-info">
-                        <h3>${c.name}</h3>
-                        <p>${c.count} Canales • Actualizado: ${c.updated}</p>
-                    </div>
-                    <div class="card-btn">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </div>
-                </div>
-            `).join('');
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tabCountries').style.color = tab === 'countries' ? 'var(--primary)' : 'var(--text-muted)';
+            document.getElementById('tabCountries').style.borderBottom = tab === 'countries' ? '2px solid var(--primary)' : 'none';
+            document.getElementById('tabChannels').style.color = tab === 'channels' ? 'var(--primary)' : 'var(--text-muted)';
+            document.getElementById('tabChannels').style.borderBottom = tab === 'channels' ? '2px solid var(--primary)' : 'none';
+            renderResults();
         }
 
-        function filterCountries() {
-            const val = document.getElementById('countrySearch').value.toLowerCase();
-            const filtered = allCountries.filter(c => c.name.toLowerCase().includes(val));
-            renderCountries(filtered);
+        function renderResults() {
+            const val = document.getElementById('globalSearch').value.toLowerCase();
+            const grid = document.getElementById('resultGrid');
+            grid.innerHTML = '';
+
+            if (currentTab === 'countries') {
+                const filtered = allCountries.filter(c => c.name.toLowerCase().includes(val));
+                if (filtered.length === 0) { grid.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No hay países.</p>'; return; }
+
+                grid.innerHTML = filtered.map(c => `
+                    <div class="card" onclick="window.location.href='epg.html?file=${encodeURIComponent(c.file)}&n=${encodeURIComponent(c.name)}'">
+                        <div class="card-info">
+                            <h3>${c.name}</h3>
+                            <p>${c.count} Canales • Actualizado: ${c.updated}</p>
+                        </div>
+                        <div class="card-btn"><i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                `).join('');
+            } else {
+                const filtered = allChannels.filter(c => c.n.toLowerCase().includes(val) || c.id.toLowerCase().includes(val)).slice(0, 100);
+                if (filtered.length === 0) { grid.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No hay canales con ese nombre o ID.</p>'; return; }
+
+                grid.innerHTML = filtered.map(c => `
+                    <div class="card" onclick="copyId('${c.id}')">
+                        <div class="card-info">
+                            <h3>${c.n}</h3>
+                            <p style="font-family: monospace; color: var(--primary); font-weight: 700;">ID: ${c.id}</p>
+                            <p style="font-size: 11px;">País: ${c.c}</p>
+                        </div>
+                        <div class="card-btn" onclick="event.stopPropagation(); window.location.href='epg.html?file=${encodeURIComponent(c.f)}&n=${encodeURIComponent(c.c)}'">
+                            <i class="fa-solid fa-tv"></i>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function copyId(id) {
+            navigator.clipboard.writeText(id);
+            alert('EPG ID Copiado: ' + id);
+        }
+
+        function handleSearch() {
+            renderResults();
         }
 
         init();

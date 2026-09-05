@@ -148,9 +148,12 @@
 
                 return `
                     <div class="epg-row">
-                        <div class="channel-cell">
+                        <div class="channel-cell" title="Click para copiar EPG ID" onclick="copyId('${c.id}')" style="cursor: pointer;">
                             <img src="${c.l || 'https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp'}" onerror="this.src='https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp'">
-                            <div class="channel-name">${c.n}</div>
+                            <div class="channel-name">
+                                ${c.n}
+                                <div style="font-size: 10px; opacity: 0.5; font-family: monospace; font-weight: 400; margin-top: 2px;">${c.id}</div>
+                            </div>
                         </div>
                         <div class="program-list">
                             ${programs}
@@ -158,6 +161,11 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        function copyId(id) {
+            navigator.clipboard.writeText(id);
+            alert('EPG ID Copiado: ' + id);
         }
 
         function showDetails(t, time, d) {

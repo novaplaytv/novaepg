@@ -107,9 +107,10 @@ def run():
             try: os.remove(path)
             except: pass
 
-    # 3. Generar JSONs individuales
-    print("🚀 Generando archivos finales...")
+    # 3. Generar JSONs individuales y buscador global
+    print("🚀 Generando archivos finales y buscador global...")
     final_countries = []
+    global_channels = []
 
     for src in sources:
         country_slug = re.sub(r'[^a-zA-Z0-9]', '_', src['name']).lower()
@@ -122,6 +123,14 @@ def run():
                 chan_map[p['cid']]['p'].append({"t": p['t'], "s": p['s'], "e": p['e'], "d": p['d']})
 
         for cdata in chan_map.values():
+            # Añadir al buscador global
+            global_channels.append({
+                "n": cdata['n'],
+                "id": cdata['id'],
+                "c": src['name'],
+                "f": filename
+            })
+
             if cdata['p']:
                 cdata['p'].sort(key=lambda x: x['s'])
                 country_db.append(cdata)
@@ -136,6 +145,11 @@ def run():
     final_countries.sort(key=lambda x: x['name'].lower())
     with open(os.path.join(DATA_DIR, "countries.json"), "w", encoding="utf-8") as f:
         json.dump(final_countries, f, indent=2, ensure_ascii=False)
+
+    # Guardar buscador global de canales
+    global_channels.sort(key=lambda x: x['n'].lower())
+    with open(os.path.join(DATA_DIR, "channels.json"), "w", encoding="utf-8") as f:
+        json.dump(global_channels, f, separators=(',', ':'), ensure_ascii=False)
 
     # 4. XMLTV Global para la APP
     print("📺 Generando guide.xml...")
