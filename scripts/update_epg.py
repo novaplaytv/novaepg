@@ -162,6 +162,13 @@ def run():
     with open(XML_OUTPUT, 'rb') as f_in, gzip.open(GZ_OUTPUT, 'wb') as f_out:
         f_out.writelines(f_in)
 
+    # Eliminar el XML plano para no saturar el repositorio
+    try:
+        os.remove(XML_OUTPUT)
+        print(f"🗑️ Archivo temporal {XML_OUTPUT} eliminado.")
+    except:
+        pass
+
     print("✅ Proceso terminado.")
 
 if __name__ == "__main__":
