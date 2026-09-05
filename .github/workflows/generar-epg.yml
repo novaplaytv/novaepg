@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout novaimg
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Configurar Python
@@ -98,7 +98,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "Sin cambios detectados."
           else
-            git commit -m "EPG & Search: Actualización automática (v81)"
+            git commit -m "EPG & Search: Actualización automática (v100)"
             # Re-intentar push con pull previo si falla
             git push || (git pull --rebase origin main && git push)
           fi
