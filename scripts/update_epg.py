@@ -17,9 +17,21 @@ NOVASPORTS_FILE = os.path.join(BASE_DIR, "novaepg/novasports/novasports.xml")
 
 def parse_time(t_str):
     if not t_str: return None
+    # Formato: 20260905112000 +0000 o 20260905112000
     try:
-        clean_t = t_str.split()[0][:14]
-        return datetime.strptime(clean_t, "%Y%m%d%H%M%S")
+        partes = t_str.split()
+        fecha_base = partes[0][:14]
+        dt = datetime.strptime(fecha_base, "%Y%m%d%H%M%S")
+        if len(partes) > 1:
+            off = partes[1]
+            signo = 1 if off[0] == '+' else -1
+            try:
+                horas = int(off[1:3])
+                mins = int(off[3:5])
+                # Ajustar a UTC
+                dt = dt - timedelta(minutes=signo * (horas * 60 + mins))
+            except: pass
+        return dt # Retorna objeto datetime en UTC
     except:
         return None
 
@@ -69,13 +81,20 @@ def extract_channels_and_programs(xml_path, is_gz=False):
                 icon = icon_regex.search(extra)
                 channels.append({"id": cid, "name": name, "logo": icon.group(1) if icon else ""})
 
-            now = datetime.now()
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             for match in p_regex.finditer(content):
                 start_str, stop_str, cid, title, extra = match.groups()
+                start_dt = parse_time(start_str)
                 stop_dt = parse_time(stop_str)
                 if stop_dt and stop_dt > now:
                     desc = desc_regex.search(extra)
-                    programs.append({"cid": cid, "t": title, "s": start_str.split()[0][:14], "e": stop_str.split()[0][:14], "d": desc.group(1) if desc else ""})
+                    programs.append({
+                        "cid": cid,
+                        "t": title,
+                        "s": start_dt.strftime("%Y%m%d%H%M%S"),
+                        "e": stop_dt.strftime("%Y%m%d%H%M%S"),
+                        "d": desc.group(1) if desc else ""
+                    })
     except Exception as e:
         print(f"   ❌ Error procesando {xml_path}: {e}")
     return channels, programs

@@ -115,8 +115,20 @@
             }
         }
 
+        function parseEpgDate(s) {
+            return new Date(Date.UTC(
+                s.substring(0, 4),
+                parseInt(s.substring(4, 6)) - 1,
+                s.substring(6, 8),
+                s.substring(8, 10),
+                s.substring(10, 12),
+                s.substring(12, 14)
+            ));
+        }
+
         function formatTime(s) {
-            return s.substring(8, 10) + ':' + s.substring(10, 12);
+            const d = parseEpgDate(s);
+            return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
         }
 
         function search() {

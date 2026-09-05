@@ -85,14 +85,14 @@
         }
 
         function parseEpgDate(s) {
-            return new Date(
+            return new Date(Date.UTC(
                 s.substring(0, 4),
                 parseInt(s.substring(4, 6)) - 1,
                 s.substring(6, 8),
                 s.substring(8, 10),
                 s.substring(10, 12),
                 s.substring(12, 14)
-            );
+            ));
         }
 
         function formatTime(d) {
