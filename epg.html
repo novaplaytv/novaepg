@@ -156,7 +156,7 @@
     </div>
 </div>
 
-<div class="epg-layout">
+<div class="epg-layout hidden">
     <div class="epg-controls">
         <div class="search-bar">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -259,19 +259,23 @@
         document.getElementById("navLogin").style.display = 'none';
         document.getElementById("adminMenu").style.display = 'flex';
         document.getElementById("auth-view").classList.add("hidden");
-    }
-
-    function UI_MostrarBotonLogin() {
-        document.getElementById("navLogin").style.display = 'block';
-        document.getElementById("adminMenu").style.display = 'none';
+        document.querySelector(".epg-layout").classList.remove("hidden");
     }
 
     function UI_MostrarLogin() {
+        document.getElementById("navLogin").style.display = 'block';
+        document.getElementById("adminMenu").style.display = 'none';
         document.getElementById("auth-view").classList.remove("hidden");
+        document.querySelector(".epg-layout").classList.add("hidden");
     }
 
     function UI_OcultarLogin() {
+        if (!sessionToken) {
+            alert("Debe iniciar sesión para ver la guía.");
+            return;
+        }
         document.getElementById("auth-view").classList.add("hidden");
+        document.querySelector(".epg-layout").classList.remove("hidden");
     }
 
     async function iniciarSesion() {
@@ -284,7 +288,7 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VERIFICANDO...';
 
         try {
-            const res = await fetch("https://mrghnngupolsgatcmevw.supabase.co/functions/v1/novaplay-admin", {
+            const res = await fetch("https://mrghnngupolsgatcmevw.supabase.co/functions/v1/actualizar-canales", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ action: "login", username, password })

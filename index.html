@@ -157,7 +157,7 @@
     </div>
 </div>
 
-<div class="search-container">
+<div class="search-container hidden">
     <div class="search-header">
         <h1>Busca tu Canal</h1>
         <p>Encuentra el EPG ID y consulta la programación al instante.</p>
@@ -208,19 +208,24 @@
         document.getElementById("navLogin").style.display = 'none';
         document.getElementById("adminMenu").style.display = 'flex';
         document.getElementById("auth-view").classList.add("hidden");
-    }
-
-    function UI_MostrarBotonLogin() {
-        document.getElementById("navLogin").style.display = 'block';
-        document.getElementById("adminMenu").style.display = 'none';
+        document.querySelector(".search-container").classList.remove("hidden");
     }
 
     function UI_MostrarLogin() {
+        document.getElementById("navLogin").style.display = 'block';
+        document.getElementById("adminMenu").style.display = 'none';
         document.getElementById("auth-view").classList.remove("hidden");
+        document.querySelector(".search-container").classList.add("hidden");
     }
 
     function UI_OcultarLogin() {
+        // No permitimos ocultar si no hay sesión, para forzar el login
+        if (!sessionToken) {
+            alert("Debe iniciar sesión para acceder al buscador.");
+            return;
+        }
         document.getElementById("auth-view").classList.add("hidden");
+        document.querySelector(".search-container").classList.remove("hidden");
     }
 
     async function iniciarSesion() {
@@ -233,7 +238,7 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VERIFICANDO...';
 
         try {
-            const res = await fetch("https://mrghnngupolsgatcmevw.supabase.co/functions/v1/novaplay-admin", {
+            const res = await fetch("https://mrghnngupolsgatcmevw.supabase.co/functions/v1/actualizar-canales", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ action: "login", username, password })
