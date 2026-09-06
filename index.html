@@ -2,12 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NovaEPG | Buscador de Canales e IDs</title>
-    <link rel="canonical" href="https://novaplaytv.github.io/novaepg/" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>NOVAPLAY | BUSCADOR EPG</title>
     <link rel="icon" type="image/webp" href="https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary: #e50914;
@@ -18,27 +20,45 @@
             --text: #ffffff;
             --text-muted: #9aa3b2;
             --border: rgba(255,255,255,0.05);
+            --success: #10b981;
+            --error: #ef4444;
             --nav-height: 70px;
         }
 
         * { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
-        html, body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; min-height: 100%; }
+        html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
         /* Navegación Premium Unificada */
         .nova-nav { position: fixed; top: 0; width: 100%; z-index: 10000; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
         .nav-inner { max-width: 1400px; margin: auto; height: var(--nav-height); padding: 0 30px; display: flex; align-items: center; justify-content: space-between; }
-        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; font-weight: 900; font-size: 18px; letter-spacing: -0.5px; }
-        .nav-brand img { width: 36px; height: 32px; border-radius: 8px; flex-shrink: 0; }
+        .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; font-weight: 900; font-size: 22px; letter-spacing: -1px; }
+        .nav-brand img { width: 36px !important; height: 32px !important; border-radius: 8px; }
 
         .nav-links { display: flex; gap: 15px; align-items: center; }
-        .nav-links a { color: #ccc; text-decoration: none; font-size: 13px; font-weight: 700; transition: 0.2s; padding: 10px 15px; border-radius: 10px; }
+        .nav-links a { color: #ccc; text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.2s; padding: 10px 15px; border-radius: 10px; }
         .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+
+        .btn-login-nav, .btn-logout {
+            background: var(--primary);
+            color: #fff !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+            border: none;
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 14px;
+            display: none;
+            transition: 0.2s;
+        }
+        .btn-login-nav:hover { transform: scale(1.05); background: var(--primary-hover); }
 
         .nav-toggle { display: none; background: none; border: none; cursor: pointer; padding: 10px; flex-direction: column; gap: 5px; z-index: 10001; }
         .nav-toggle span { display: block; width: 25px; height: 3px; background: #fff; transition: 0.3s; border-radius: 2px; }
 
         .admin-menu { position: relative; display: flex; align-items: center; height: var(--nav-height); padding: 0 10px; }
-        .btn-admin { background: #fff; color: #000; font-weight: 900; border: none; cursor: pointer; padding: 10px 20px; border-radius: 12px; font-size: 12px; display: flex; align-items: center; gap: 10px; transition: 0.2s; position: relative; z-index: 10002; }
+        .btn-admin { background: #fff; color: #000; font-weight: 900; border: none; cursor: pointer; padding: 10px 20px; border-radius: 12px; font-size: 13px; display: flex; align-items: center; gap: 10px; transition: 0.2s; position: relative; z-index: 10002; }
         .btn-admin:hover { background: var(--primary); color: #fff; box-shadow: 0 0 20px rgba(229,9,20,0.4); }
         .dropdown-content { position: absolute; top: 100%; right: 0; background: var(--card-bg); min-width: 260px; border-radius: 20px; border: 1px solid var(--border); overflow: hidden; display: none; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.8); z-index: 10001; margin-top: 5px; }
         .dropdown-content::before { content: ""; position: absolute; top: -30px; left: 0; right: 0; height: 40px; background: transparent; }
@@ -46,8 +66,9 @@
         .dropdown-content a { padding: 15px 20px; color: #fff !important; text-decoration: none !important; font-size: 13px !important; font-weight: 700 !important; border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.2s; display: flex; align-items: center; gap: 12px; }
         .dropdown-content a i { width: 20px; color: var(--primary); text-align: center; }
         .dropdown-content a:hover { background: rgba(255,255,255,0.05); padding-left: 25px; }
+        .dropdown-content .logout-link { color: var(--error) !important; border-bottom: none; }
 
-        /* Search Container */
+        /* Search Layout */
         .search-container { max-width: 1000px; margin: 120px auto 40px; padding: 0 20px; }
         .search-header { text-align: center; margin-bottom: 50px; }
         .search-header h1 { font-size: 54px; font-weight: 900; letter-spacing: -2px; }
@@ -80,7 +101,7 @@
         .btn-full-guide { margin-top: 20px; display: inline-flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 12px; font-weight: 800; text-transform: uppercase; transition: 0.2s; }
         .btn-full-guide:hover { color: var(--primary); }
 
-        /* Auth View Legacy Override */
+        /* Login Modal */
         #auth-view { position: fixed; inset: 0; background: var(--bg); z-index: 20001; display: flex; justify-content: center; align-items: center; }
         .auth-card { width: 400px; padding: 50px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 35px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
         .auth-card input { width: 100%; padding: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; color: #fff; margin-bottom: 15px; font-size: 15px; }
@@ -92,6 +113,7 @@
         .hidden { display: none !important; }
 
         @media (max-width: 900px) {
+            .nav-inner { padding: 0 15px; }
             .nav-toggle { display: flex; }
             .nav-links { position: fixed; top: 0; right: -100%; width: 100%; height: 100vh; background: rgba(8, 10, 16, 0.98); backdrop-filter: blur(20px); flex-direction: column; justify-content: center; align-items: center; transition: 0.4s; gap: 20px; padding: 40px; z-index: 9999; }
             .nav-links.active { right: 0; }
@@ -201,7 +223,7 @@
 
     function restaurarSesion() {
         if (sessionToken) { UI_MostrarPanel(); }
-        else { UI_MostrarBotonLogin(); }
+        else { UI_MostrarLogin(); }
     }
 
     function UI_MostrarPanel() {
@@ -219,7 +241,6 @@
     }
 
     function UI_OcultarLogin() {
-        // No permitimos ocultar si no hay sesión, para forzar el login
         if (!sessionToken) {
             alert("Debe iniciar sesión para acceder al buscador.");
             return;
@@ -267,7 +288,6 @@
         if (confirm("¿Estás seguro que deseas cerrar sesión?")) {
             localStorage.removeItem("novaplay_session_token");
             sessionToken = null;
-            UI_MostrarBotonLogin();
             location.reload();
         }
     }

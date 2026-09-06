@@ -30,7 +30,7 @@
         .nova-nav { position: fixed; top: 0; width: 100%; z-index: 10000; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
         .nav-inner { max-width: 1400px; margin: auto; height: var(--nav-height); padding: 0 30px; display: flex; align-items: center; justify-content: space-between; }
         .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; font-weight: 900; font-size: 18px; letter-spacing: -0.5px; }
-        .nav-brand img { width: 36px; height: 32px; border-radius: 8px; flex-shrink: 0; }
+        .nav-brand img { width: 36px !important; height: 32px !important; border-radius: 8px; flex-shrink: 0; }
         .nav-links { display: flex; gap: 15px; align-items: center; }
         .nav-links a { color: #ccc; text-decoration: none; font-size: 13px; font-weight: 700; transition: 0.2s; padding: 10px 15px; border-radius: 10px; }
         .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.05); }
@@ -45,6 +45,7 @@
         .dropdown-content a { padding: 15px 20px; color: #fff !important; text-decoration: none !important; font-size: 13px !important; font-weight: 700 !important; border-bottom: 1px solid rgba(255,255,255,0.03); transition: 0.2s; display: flex; align-items: center; gap: 12px; }
         .dropdown-content a i { width: 20px; color: var(--primary); text-align: center; }
         .dropdown-content a:hover { background: rgba(255,255,255,0.05); padding-left: 25px; }
+        .dropdown-content .logout-link { color: var(--error) !important; }
 
         /* EPG Layout */
         .epg-layout { display: flex; flex-direction: column; height: 100vh; padding-top: var(--nav-height); }
@@ -72,16 +73,7 @@
         .p-title { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
         .p-time { font-size: 11px; color: var(--text-muted); font-weight: 600; }
 
-        /* Modal */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 20000; }
-        .modal { background: var(--card-bg); width: 90%; max-width: 500px; border-radius: 24px; padding: 40px; position: relative; border: 1px solid var(--border); }
-        .modal h2 { margin-bottom: 15px; font-weight: 900; color: var(--primary); }
-        .modal p { color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
-        .close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 20px; color: var(--text-muted); }
-
-        .close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 20px; color: var(--text-muted); }
-
-        /* Auth View Legacy Override */
+        /* Auth/Login Modal */
         #auth-view { position: fixed; inset: 0; background: var(--bg); z-index: 20001; display: flex; justify-content: center; align-items: center; }
         .auth-card { width: 400px; padding: 50px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 35px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
         .auth-card input { width: 100%; padding: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; color: #fff; margin-bottom: 15px; font-size: 15px; }
@@ -89,6 +81,13 @@
         .status.error { background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid var(--error); }
         .form-group-auth { text-align: left; margin-bottom: 20px; }
         .form-group-auth label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 20000; }
+        .modal { background: var(--card-bg); width: 90%; max-width: 500px; border-radius: 24px; padding: 40px; position: relative; border: 1px solid var(--border); }
+        .modal h2 { margin-bottom: 15px; font-weight: 900; color: var(--primary); }
+        .modal p { color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
+        .close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 20px; color: var(--text-muted); }
+
         .hidden { display: none !important; }
 
         @media (max-width: 900px) {
@@ -252,7 +251,7 @@
 
     function restaurarSesion() {
         if (sessionToken) { UI_MostrarPanel(); }
-        else { UI_MostrarBotonLogin(); }
+        else { UI_MostrarLogin(); }
     }
 
     function UI_MostrarPanel() {
@@ -317,7 +316,6 @@
         if (confirm("¿Estás seguro que deseas cerrar sesión?")) {
             localStorage.removeItem("novaplay_session_token");
             sessionToken = null;
-            UI_MostrarBotonLogin();
             location.reload();
         }
     }
