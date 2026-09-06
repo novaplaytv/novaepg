@@ -11,10 +11,38 @@
 </head>
 <body style="overflow: hidden;">
 
-    <nav class="navbar">
-        <a href="https://novaplaytv.github.io/novaepg/" class="nav-logo">NOVA<span>EPG</span></a>
-        <div style="margin-left: 30px; font-weight: 700; font-size: 14px; opacity: 0.6;" id="countryIndicator">Cargando...</div>
-    </nav>
+<nav class="nova-nav">
+    <div class="nav-inner">
+        <a class="nav-brand" href="https://novaplaytv.github.io/Dashboard/">
+            <img src="https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp" alt="Logo">
+            <div style="display: flex; flex-direction: column; line-height: 1;">
+                NOVAPLAY | BUSCADOR EPG
+                <span id="statusBadge" style="font-size: 8px; font-weight: 800; margin-top: 4px; letter-spacing: 0; opacity: 0.8;">🟢 OPERATIVO</span>
+            </div>
+        </a>
+        <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links" id="navLinks">
+            <a href="https://novaplaytv.github.io/" style="color: var(--primary); font-weight: 800;">INICIO</a>
+            <div id="countryIndicator" style="margin-left: 15px; font-weight: 700; font-size: 11px; opacity: 0.6; color: #fff;">Cargando...</div>
+            <div class="admin-menu" id="adminMenu">
+                <button class="btn-admin"><i class="fas fa-user-shield"></i> PANEL</button>
+                <div class="dropdown-content">
+                    <a href="https://novaplaytv.github.io/Dashboard/"><i class="fas fa-chart-line"></i> Dashboard Central</a>
+                    <a href="https://novaplaytv.github.io/panel-canales/"><i class="fas fa-tv"></i> Admin. Canales</a>
+                    <a href="https://novaplaytv.github.io/NovaSecurity/"><i class="fas fa-shield-alt"></i> NovaSecurity</a>
+                    <a href="https://novaplaytv.github.io/SignalVerificador/"><i class="fas fa-broadcast-tower"></i> Verificador de Señal</a>
+                    <a href="https://novaplaytv.github.io/novaimg/actualizar-icono/"><i class="fas fa-icons"></i> Gestión de Iconos</a>
+                    <a href="https://novaplaytv.github.io/novaimg/generador/"><i class="fas fa-magic"></i> Icon Studio</a>
+                    <a href="https://novaplaytv.github.io/novaepg/"><i class="fas fa-calendar-alt"></i> Buscador EPG ID</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
 
     <div class="epg-layout">
         <div class="epg-controls">
@@ -178,6 +206,17 @@
 
         function closeModal() {
             document.getElementById('modalOverlay').style.display = 'none';
+        }
+
+        // Toggle Menú Móvil
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+
+        if (navToggle) {
+            navToggle.addEventListener('click', () => {
+                navToggle.classList.toggle('active');
+                navLinks.classList.toggle('active');
+            });
         }
 
         init();
