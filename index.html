@@ -80,6 +80,17 @@
         .btn-full-guide { margin-top: 20px; display: inline-flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 12px; font-weight: 800; text-transform: uppercase; transition: 0.2s; }
         .btn-full-guide:hover { color: var(--primary); }
 
+        /* Auth View Legacy Override */
+        #auth-view { position: fixed; inset: 0; background: var(--bg); z-index: 20001; display: flex; justify-content: center; align-items: center; }
+        .auth-card { width: 400px; padding: 50px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 35px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+        .auth-card input { width: 100%; padding: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; color: #fff; margin-bottom: 15px; font-size: 15px; }
+        .status { margin-top: 15px; padding: 14px; border-radius: 12px; font-size: 13px; font-weight: 800; display: none; text-align: center; }
+        .status.error { background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid var(--error); }
+        .form-group-auth { text-align: left; margin-bottom: 20px; }
+        .form-group-auth label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; }
+
+        .hidden { display: none !important; }
+
         @media (max-width: 900px) {
             .nav-toggle { display: flex; }
             .nav-links { position: fixed; top: 0; right: -100%; width: 100%; height: 100vh; background: rgba(8, 10, 16, 0.98); backdrop-filter: blur(20px); flex-direction: column; justify-content: center; align-items: center; transition: 0.4s; gap: 20px; padding: 40px; z-index: 9999; }
@@ -109,7 +120,8 @@
         </button>
         <div class="nav-links" id="navLinks">
             <a href="https://novaplaytv.github.io/" style="color: var(--primary); font-weight: 800;">INICIO</a>
-            <div class="admin-menu" id="adminMenu">
+            <a href="#" class="btn-login-nav" id="navLogin" onclick="UI_MostrarLogin()">INGRESAR</a>
+            <div class="admin-menu" id="adminMenu" style="display: none;">
                 <button class="btn-admin"><i class="fas fa-user-shield"></i> PANEL</button>
                 <div class="dropdown-content">
                     <a href="https://novaplaytv.github.io/Dashboard/"><i class="fas fa-chart-line"></i> Dashboard Central</a>
@@ -119,11 +131,31 @@
                     <a href="https://novaplaytv.github.io/novaimg/actualizar-icono/"><i class="fas fa-icons"></i> Gestión de Iconos</a>
                     <a href="https://novaplaytv.github.io/novaimg/generador/"><i class="fas fa-magic"></i> Icon Studio</a>
                     <a href="https://novaplaytv.github.io/novaepg/"><i class="fas fa-calendar-alt"></i> Buscador EPG ID</a>
+                    <a href="#" onclick="cerrarSesion(); return false;" class="logout-link" style="color: var(--error) !important;"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
                 </div>
             </div>
         </div>
     </div>
 </nav>
+
+<div id="auth-view" class="hidden">
+    <div class="auth-card">
+        <div style="text-align: right; margin-top: -30px; margin-right: -20px; margin-bottom: 20px;">
+            <button class="btn-icon" onclick="UI_OcultarLogin()" style="color: var(--text-muted); font-size: 20px; cursor: pointer; background: none; border: none;"><i class="fas fa-times"></i></button>
+        </div>
+        <h2 style="margin-bottom:30px; font-weight:900; font-size: 28px;">Acceso al Panel</h2>
+        <div class="form-group-auth">
+            <label>Usuario</label>
+            <input type="text" id="username" placeholder="Usuario" autocomplete="username">
+        </div>
+        <div class="form-group-auth">
+            <label>Contraseña</label>
+            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <button class="btn-admin" id="loginButton" style="width:100%; justify-content:center; padding: 18px; border-radius: 14px; font-weight: 900; background: var(--primary); color: #fff;" onclick="iniciarSesion()">INGRESAR AL SISTEMA</button>
+        <div id="loginStatus" class="status"></div>
+    </div>
+</div>
 
 <div class="search-container">
     <div class="search-header">
@@ -153,15 +185,85 @@
 
 <script>
     let searchData = [];
+    let sessionToken = localStorage.getItem("novaplay_session_token");
     const clock = () => new Date().toISOString().replace(/[-:T.Z]/g, '').slice(0, 14);
 
     async function init() {
+        restaurarSesion();
         try {
             const res = await fetch('data/search_db.json?t=' + Date.now());
             searchData = await res.json();
         } catch (e) {
             console.error("Error cargando DB:", e);
             document.getElementById('resultsArea').innerHTML = '<p style="text-align:center;">Error al cargar la base de datos de canales.</p>';
+        }
+    }
+
+    function restaurarSesion() {
+        if (sessionToken) { UI_MostrarPanel(); }
+        else { UI_MostrarBotonLogin(); }
+    }
+
+    function UI_MostrarPanel() {
+        document.getElementById("navLogin").style.display = 'none';
+        document.getElementById("adminMenu").style.display = 'flex';
+        document.getElementById("auth-view").classList.add("hidden");
+    }
+
+    function UI_MostrarBotonLogin() {
+        document.getElementById("navLogin").style.display = 'block';
+        document.getElementById("adminMenu").style.display = 'none';
+    }
+
+    function UI_MostrarLogin() {
+        document.getElementById("auth-view").classList.remove("hidden");
+    }
+
+    function UI_OcultarLogin() {
+        document.getElementById("auth-view").classList.add("hidden");
+    }
+
+    async function iniciarSesion() {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const btn = document.getElementById("loginButton");
+        if (!username || !password) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> VERIFICANDO...';
+
+        try {
+            const res = await fetch("https://mrghnngupolsgatcmevw.supabase.co/functions/v1/novaplay-admin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "login", username, password })
+            });
+            const data = await res.json();
+            if (res.ok && data.token) {
+                sessionToken = data.token;
+                localStorage.setItem("novaplay_session_token", sessionToken);
+                UI_MostrarPanel();
+            } else {
+                const el = document.getElementById("loginStatus");
+                el.textContent = "Acceso denegado.";
+                el.style.display = "block";
+                el.className = "status error";
+                btn.disabled = false;
+                btn.textContent = 'INGRESAR AL SISTEMA';
+            }
+        } catch(e) {
+            alert("Error de conexión.");
+            btn.disabled = false;
+            btn.textContent = 'INGRESAR AL SISTEMA';
+        }
+    }
+
+    function cerrarSesion() {
+        if (confirm("¿Estás seguro que deseas cerrar sesión?")) {
+            localStorage.removeItem("novaplay_session_token");
+            sessionToken = null;
+            UI_MostrarBotonLogin();
+            location.reload();
         }
     }
 
