@@ -155,6 +155,25 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="novaModal">
+    <div class="modal" style="max-width: 450px;">
+        <div class="modal-header">
+            <h2 id="novaModalTitle" style="font-weight:900;">Confirmar</h2>
+        </div>
+        <div class="modal-body" style="text-align: center; padding-top: 10px;">
+            <p id="novaModalMessage" style="color: var(--text-muted); margin-bottom: 25px; line-height: 1.5;"></p>
+            <div id="modalInputContainer" class="hidden">
+                <input type="text" id="modalInput" placeholder="...">
+                <select id="modalSelect" class="hidden"></select>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <button class="btn-admin" id="novaModalCancel" style="justify-content: center; background: var(--input-bg); color: #fff;">CANCELAR</button>
+                <button class="btn-admin" id="novaModalConfirm" style="justify-content: center; background: var(--primary); color: #fff;">ACEPTAR</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="epg-layout hidden">
     <div class="epg-controls">
         <div class="search-bar">
@@ -312,12 +331,61 @@
         }
     }
 
-    function cerrarSesion() {
-        if (confirm("¿Estás seguro que deseas cerrar sesión?")) {
+    async function cerrarSesion() {
+        const confirm = await openModal("Cerrar Sesión", "¿Estás seguro que deseas cerrar sesión?");
+        if (confirm) {
             localStorage.removeItem("novaplay_session_token");
             sessionToken = null;
             location.reload();
         }
+    }
+
+    /* NovaModal Premium */
+    function openModal(title, msg, type = "confirm", options = [], defaultValue = "") {
+        return new Promise((resolve) => {
+            const m = document.getElementById("novaModal");
+            if (!m) return resolve(false);
+
+            document.getElementById("novaModalTitle").innerText = title;
+            document.getElementById("novaModalMessage").innerText = msg;
+
+            const inputContainer = document.getElementById("modalInputContainer");
+            const input = document.getElementById("modalInput");
+            const select = document.getElementById("modalSelect");
+
+            if (inputContainer) inputContainer.classList.add("hidden");
+            if (input) input.classList.add("hidden");
+            if (select) select.classList.add("hidden");
+
+            if (type === "prompt") {
+                if (inputContainer) inputContainer.classList.remove("hidden");
+                if (input) {
+                    input.classList.remove("hidden");
+                    input.value = defaultValue;
+                    setTimeout(() => input.focus(), 100);
+                }
+            } else if (type === "select") {
+                if (inputContainer) inputContainer.classList.remove("hidden");
+                if (select) {
+                    select.classList.remove("hidden");
+                    select.innerHTML = options.map(o => `<option value="${o.value}">${o.text}</option>`).join('');
+                    setTimeout(() => select.focus(), 100);
+                }
+            }
+
+            m.style.display = "flex";
+
+            document.getElementById("novaModalCancel").onclick = () => {
+                m.style.display = "none";
+                resolve(false);
+            };
+            document.getElementById("novaModalConfirm").onclick = () => {
+                m.style.display = "none";
+                if (type === "prompt") resolve(input.value);
+                else if (type === "select") resolve(select.value);
+                else resolve(true);
+            };
+        });
     }
 
     const navToggle = document.getElementById('navToggle');
