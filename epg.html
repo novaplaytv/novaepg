@@ -73,6 +73,16 @@
         .p-title { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
         .p-time { font-size: 11px; color: var(--text-muted); font-weight: 600; }
 
+        /* Modals */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 50000; padding: 20px; }
+        .modal { background: var(--card-bg); width: 100%; max-width: 450px; border-radius: 30px; border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.6); padding: 35px; text-align: center; }
+        .modal-header { padding-bottom: 20px; }
+        .modal-header h2 { font-size: 24px; font-weight: 900; color: #fff; }
+        .modal-body { padding: 10px 0 30px; }
+        .modal-body p { color: var(--text-muted); line-height: 1.6; font-size: 15px; font-weight: 600; }
+        .modal-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 20px; color: var(--text-muted); }
+
         /* Auth/Login Modal */
         #auth-view { position: fixed; inset: 0; background: var(--bg); z-index: 20001; display: flex; justify-content: center; align-items: center; }
         .auth-card { width: 400px; padding: 50px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 35px; text-align: center; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
@@ -81,12 +91,6 @@
         .status.error { background: rgba(239,68,68,0.1); color: var(--error); border: 1px solid var(--error); }
         .form-group-auth { text-align: left; margin-bottom: 20px; }
         .form-group-auth label { display: block; margin-bottom: 8px; font-size: 11px; font-weight: 900; color: var(--text-muted); text-transform: uppercase; }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 20000; }
-        .modal { background: var(--card-bg); width: 90%; max-width: 500px; border-radius: 24px; padding: 40px; position: relative; border: 1px solid var(--border); }
-        .modal h2 { margin-bottom: 15px; font-weight: 900; color: var(--primary); }
-        .modal p { color: var(--text-muted); margin-bottom: 20px; line-height: 1.6; }
-        .close-btn { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 20px; color: var(--text-muted); }
 
         .hidden { display: none !important; }
 
@@ -155,25 +159,6 @@
     </div>
 </div>
 
-<div class="modal-overlay" id="novaModal">
-    <div class="modal" style="max-width: 450px;">
-        <div class="modal-header">
-            <h2 id="novaModalTitle" style="font-weight:900;">Confirmar</h2>
-        </div>
-        <div class="modal-body" style="text-align: center; padding-top: 10px;">
-            <p id="novaModalMessage" style="color: var(--text-muted); margin-bottom: 25px; line-height: 1.5;"></p>
-            <div id="modalInputContainer" class="hidden">
-                <input type="text" id="modalInput" placeholder="...">
-                <select id="modalSelect" class="hidden"></select>
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <button class="btn-admin" id="novaModalCancel" style="justify-content: center; background: var(--input-bg); color: #fff;">CANCELAR</button>
-                <button class="btn-admin" id="novaModalConfirm" style="justify-content: center; background: var(--primary); color: #fff;">ACEPTAR</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="epg-layout hidden">
     <div class="epg-controls">
         <div class="search-bar">
@@ -196,11 +181,26 @@
 </div>
 
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
-    <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal">
         <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
         <h2 id="mTitle">Título del Programa</h2>
         <p id="mTime" style="color: var(--primary); font-weight: 700; font-size: 14px;"></p>
-        <p id="mDesc"></p>
+        <p id="mDesc" style="color: var(--text-muted); line-height: 1.6;"></p>
+    </div>
+</div>
+
+<div class="modal-overlay" id="novaModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 id="novaModalTitle">Confirmar</h2>
+        </div>
+        <div class="modal-body">
+            <p id="novaModalMessage"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-admin" id="novaModalCancel" style="justify-content: center; background: var(--input-bg); color: #fff;">CANCELAR</button>
+            <button class="btn-admin" id="novaModalConfirm" style="justify-content: center; background: var(--primary); color: #fff;">ACEPTAR</button>
+        </div>
     </div>
 </div>
 
@@ -332,8 +332,8 @@
     }
 
     async function cerrarSesion() {
-        const confirm = await openModal("Cerrar Sesión", "¿Estás seguro que deseas cerrar sesión?");
-        if (confirm) {
+        const confirmResult = await openModal("Cerrar Sesión", "¿Estás seguro que deseas cerrar sesión?");
+        if (confirmResult) {
             localStorage.removeItem("novaplay_session_token");
             sessionToken = null;
             location.reload();
