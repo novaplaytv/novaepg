@@ -10,8 +10,12 @@ from concurrent.futures import ThreadPoolExecutor
 # --- CONFIGURACIÓN ---
 API_FETCH_URL = "https://www.open-epg.com/app/epgfetch.php"
 PLUTO_TV_URL = "https://i.mjh.nz/PlutoTV/all.xml.gz"
-ALBA_ARG_URL = "https://albaforge.com/bin-cas6u/epg/an/EPG/ARGENTINA.xml.gz"
-ALBA_FLOW_URL = "https://albaforge.com/bin-cas6u/epg/an/EPG/FLOWTV.xml.gz"
+
+# FASE REPARACIÓN (v133): Nuevas fuentes 2026 (Bypass Albaforge Obsoleto)
+FLOW_AR_URL = "https://i.mjh.nz/CableVision/ar.xml.gz"
+FLOW_PY_URL = "https://i.mjh.nz/CableVision/py.xml.gz"
+LATINO_BACKUP_URL = "https://raw.githubusercontent.com/acidjesuz/EPGTalk/master/Latino_guide.xml.gz"
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 EPG_DIR = os.path.join(BASE_DIR, "epg")
@@ -51,7 +55,7 @@ def get_files_list():
 
 def download_file(url, country):
     filename = os.path.basename(url)
-    local_path = os.path.join(TEMP_DIR, filename)
+    local_path = os.path.join(TEMP_DIR, f"{country}_{filename}")
     try:
         for _ in range(2):
             try:
@@ -104,7 +108,7 @@ def process_country(item):
     return None
 
 def run():
-    print("🚀 INICIANDO MOTOR NOVA-EPG ULTRA-FAST...")
+    print("🚀 INICIANDO MOTOR NOVA-EPG ULTRA-FAST (v133)...")
     start_time = time.time()
     files = get_files_list()
     if not files: return
@@ -113,6 +117,7 @@ def run():
     os.makedirs(DATA_DIR, exist_ok=True)
     sources = []
 
+    # 1. Fuentes Internas
     if os.path.exists(TVMAX_FILE):
         c, p = extract_channels_and_programs(TVMAX_FILE)
         sources.append({"name": "TVMAX", "channels": c, "programs": p, "age": "Ahora", "is_external": False})
@@ -120,7 +125,8 @@ def run():
         c, p = extract_channels_and_programs(NOVASPORTS_FILE)
         sources.append({"name": "NOVASPORTS", "channels": c, "programs": p, "age": "24/7", "is_external": False})
 
-    print("🎬 Procesando Pluto TV (Prioridad)...")
+    # 2. Fuentes Externas Premium (v133)
+    print("🎬 Procesando Pluto TV...")
     path_pluto = download_file(PLUTO_TV_URL, "Pluto TV")
     if path_pluto:
         c, p = extract_channels_and_programs(path_pluto)
@@ -128,22 +134,24 @@ def run():
         try: os.remove(path_pluto)
         except: pass
 
-    print("📡 Procesando Alba Argentina...")
-    path_alba_arg = download_file(ALBA_ARG_URL, "Alba Argentina")
-    if path_alba_arg:
-        c, p = extract_channels_and_programs(path_alba_arg)
-        sources.append({"name": "Alba Argentina", "channels": c, "programs": p, "age": "Ahora", "is_external": True})
-        try: os.remove(path_alba_arg)
+    print("📡 Procesando FLOW (Argentina + Paraguay)...")
+    for url, label in [(FLOW_AR_URL, "Flow Argentina"), (FLOW_PY_URL, "Flow Paraguay")]:
+        path = download_file(url, label)
+        if path:
+            c, p = extract_channels_and_programs(path)
+            sources.append({"name": label, "channels": c, "programs": p, "age": "Ahora", "is_external": True})
+            try: os.remove(path)
+            except: pass
+
+    print("📡 Procesando Latino Backup (EPGTalk)...")
+    path_latino = download_file(LATINO_BACKUP_URL, "Latino Backup")
+    if path_latino:
+        c, p = extract_channels_and_programs(path_latino)
+        sources.append({"name": "Latino Backup", "channels": c, "programs": p, "age": "Ahora", "is_external": True})
+        try: os.remove(path_latino)
         except: pass
 
-    print("📡 Procesando Alba Flow...")
-    path_alba_flow = download_file(ALBA_FLOW_URL, "Alba Flow")
-    if path_alba_flow:
-        c, p = extract_channels_and_programs(path_alba_flow)
-        sources.append({"name": "Alba Flow", "channels": c, "programs": p, "age": "Ahora", "is_external": True})
-        try: os.remove(path_alba_flow)
-        except: pass
-
+    # 3. Descarga paralela de Open-EPG
     print(f"🌍 Descarga paralela de {len(files)} países...")
     with ThreadPoolExecutor(max_workers=10) as executor:
         results = list(executor.map(process_country, files))
