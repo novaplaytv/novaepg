@@ -1,4 +1,4 @@
-import requests
+﻿import requests
 import os
 import gzip
 import json
@@ -7,9 +7,9 @@ import time
 from datetime import datetime, timedelta, timezone
 from concurrent.futures import ThreadPoolExecutor
 
-# --- CONFIGURACIÓN ---
+# --- CONFIGURACIÃ“N ---
 API_FETCH_URL = "https://www.open-epg.com/app/epgfetch.php"
-PLUTO_TV_URL = "https://i.mjh.nz/PlutoTV/all.xml.gz"
+PLUTO_TV_URL = "https://i.mjh.nz/PlutoTV/all.xml.gz"`nALBA_ARG_URL = "https://albaforge.com/bin-cas6u/epg/an/EPG/ARGENTINA.xml.gz"`nALBA_FLOW_URL = "https://albaforge.com/bin-cas6u/epg/an/EPG/FLOWTV.xml.gz"
 ALBA_ARG_URL = "https://albaforge.com/bin-cas6u/epg/an/EPG/ARGENTINA.xml.gz"
 ALBA_FLOW_URL = "https://albaforge.com/bin-cas6u/epg/an/EPG/FLOWTV.xml.gz"
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,7 +19,7 @@ TEMP_DIR = os.path.join(DATA_DIR, "temp")
 TVMAX_FILE = os.path.join(BASE_DIR, "novaepg/tvmax/tvmax.xml")
 NOVASPORTS_FILE = os.path.join(BASE_DIR, "novaepg/novasports/novasports.xml")
 
-# Sesión global para optimizar conexiones
+# SesiÃ³n global para optimizar conexiones
 session = requests.Session()
 
 def parse_time(t_str):
@@ -40,13 +40,13 @@ def parse_time(t_str):
     except: return None
 
 def get_files_list():
-    print("📡 Obteniendo lista de archivos de Open-EPG...")
+    print("ðŸ“¡ Obteniendo lista de archivos de Open-EPG...")
     try:
         r = session.get(API_FETCH_URL, timeout=30)
         r.raise_for_status()
         return r.json()
     except Exception as e:
-        print(f"❌ Error al obtener la lista: {e}")
+        print(f"âŒ Error al obtener la lista: {e}")
         return []
 
 def download_file(url, country):
@@ -88,7 +88,7 @@ def extract_channels_and_programs(xml_path, is_gz=False):
                 if stop_dt and stop_dt > now:
                     desc = desc_regex.search(extra)
                     programs.append({"cid": cid, "t": title, "s": start_dt.strftime("%Y%m%d%H%M%S"), "e": stop_dt.strftime("%Y%m%d%H%M%S"), "d": desc.group(1) if desc else ""})
-    except Exception as e: print(f"   ⚠️ Error procesando {xml_path}: {e}")
+    except Exception as e: print(f"   âš ï¸ Error procesando {xml_path}: {e}")
     return channels, programs
 
 def process_country(item):
@@ -104,7 +104,7 @@ def process_country(item):
     return None
 
 def run():
-    print("🚀 INICIANDO MOTOR NOVA-EPG ULTRA-FAST...")
+    print("ðŸš€ INICIANDO MOTOR NOVA-EPG ULTRA-FAST...")
     start_time = time.time()
     files = get_files_list()
     if not files: return
@@ -120,7 +120,7 @@ def run():
         c, p = extract_channels_and_programs(NOVASPORTS_FILE)
         sources.append({"name": "NOVASPORTS", "channels": c, "programs": p, "age": "24/7", "is_external": False})
 
-    print("🎬 Procesando Pluto TV (Prioridad)...")
+    print("ðŸŽ¬ Procesando Pluto TV (Prioridad)...")
     path_pluto = download_file(PLUTO_TV_URL, "Pluto TV")
     if path_pluto:
         c, p = extract_channels_and_programs(path_pluto)
@@ -128,7 +128,7 @@ def run():
         try: os.remove(path_pluto)
         except: pass
 
-    print("📡 Procesando Alba Argentina...")
+    print("ðŸ“¡ Procesando Alba Argentina...")
     path_alba_arg = download_file(ALBA_ARG_URL, "Alba Argentina")
     if path_alba_arg:
         c, p = extract_channels_and_programs(path_alba_arg)
@@ -136,7 +136,7 @@ def run():
         try: os.remove(path_alba_arg)
         except: pass
 
-    print("📡 Procesando Alba Flow...")
+    print("ðŸ“¡ Procesando Alba Flow...")
     path_alba_flow = download_file(ALBA_FLOW_URL, "Alba Flow")
     if path_alba_flow:
         c, p = extract_channels_and_programs(path_alba_flow)
@@ -144,13 +144,13 @@ def run():
         try: os.remove(path_alba_flow)
         except: pass
 
-    print(f"🌍 Descarga paralela de {len(files)} países...")
+    print(f"ðŸŒ Descarga paralela de {len(files)} paÃ­ses...")
     with ThreadPoolExecutor(max_workers=10) as executor:
         results = list(executor.map(process_country, files))
     for r in results:
         if r: sources.append(r)
 
-    print("💾 Compilando resultados finales...")
+    print("ðŸ’¾ Compilando resultados finales...")
     final_countries, search_db = [], []
     for src in sources:
         country_slug = re.sub(r'[^a-zA-Z0-9]', '_', src['name']).lower()
@@ -178,7 +178,7 @@ def run():
     with open(os.path.join(DATA_DIR, "search_db.json"), "w", encoding="utf-8") as f:
         json.dump(search_db, f, separators=(',', ':'), ensure_ascii=False)
 
-    print("📺 Generando guide.xml global...")
+    print("ðŸ“º Generando guide.xml global...")
     XML_OUTPUT, GZ_OUTPUT = os.path.join(EPG_DIR, "guide.xml"), os.path.join(EPG_DIR, "guide.xml.gz")
     def clean(t): return t.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
     with open(XML_OUTPUT, 'w', encoding='utf-8') as x:
@@ -197,7 +197,7 @@ def run():
     with open(XML_OUTPUT, 'rb') as f_in, gzip.open(GZ_OUTPUT, 'wb') as f_out: f_out.writelines(f_in)
     try: os.remove(XML_OUTPUT)
     except: pass
-    print(f"✅ FINALIZADO EN {int(time.time() - start_time)} SEGUNDOS.")
+    print(f"âœ… FINALIZADO EN {int(time.time() - start_time)} SEGUNDOS.")
 
 if __name__ == "__main__":
     run()
