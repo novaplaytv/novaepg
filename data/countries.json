@@ -59,7 +59,7 @@
     "name": "Bosnia",
     "slug": "bosnia",
     "file": "epg_bosnia.json",
-    "count": 269,
+    "count": 199,
     "updated": "10-09-0026",
     "external": false
   },
@@ -131,7 +131,7 @@
     "name": "Canada",
     "slug": "canada",
     "file": "epg_canada.json",
-    "count": 850,
+    "count": 849,
     "updated": "10-09-0026",
     "external": false
   },
@@ -139,8 +139,8 @@
     "name": "Chile 1",
     "slug": "chile_1",
     "file": "epg_chile_1.json",
-    "count": 135,
-    "updated": "10-09-0026",
+    "count": 143,
+    "updated": "11-09-0026",
     "external": false
   },
   {
@@ -203,8 +203,8 @@
     "name": "Cyprus 1",
     "slug": "cyprus_1",
     "file": "epg_cyprus_1.json",
-    "count": 93,
-    "updated": "10-09-0026",
+    "count": 99,
+    "updated": "11-09-0026",
     "external": false
   },
   {
@@ -339,8 +339,8 @@
     "name": "Ghana 1",
     "slug": "ghana_1",
     "file": "epg_ghana_1.json",
-    "count": 47,
-    "updated": "10-09-0026",
+    "count": 44,
+    "updated": "11-09-0026",
     "external": false
   },
   {
@@ -388,7 +388,7 @@
     "slug": "hong_kong_3",
     "file": "epg_hong_kong_3.json",
     "count": 50,
-    "updated": "10-09-0026",
+    "updated": "11-09-0026",
     "external": false
   },
   {
@@ -412,7 +412,7 @@
     "slug": "hungary_1",
     "file": "epg_hungary_1.json",
     "count": 172,
-    "updated": "10-09-0026",
+    "updated": "11-09-0026",
     "external": false
   },
   {
@@ -539,7 +539,7 @@
     "name": "Japan 2",
     "slug": "japan_2",
     "file": "epg_japan_2.json",
-    "count": 105,
+    "count": 104,
     "updated": "10-09-0026",
     "external": false
   },
@@ -566,6 +566,14 @@
     "count": 305,
     "updated": "11-09-0026",
     "external": false
+  },
+  {
+    "name": "Latino Backup",
+    "slug": "latino_backup",
+    "file": "epg_latino_backup.json",
+    "count": 607,
+    "updated": "Ahora",
+    "external": true
   },
   {
     "name": "Latvia 1",
@@ -612,6 +620,14 @@
     "slug": "macedonia_1",
     "file": "epg_macedonia_1.json",
     "count": 344,
+    "updated": "11-09-0026",
+    "external": false
+  },
+  {
+    "name": "Madagascar 1",
+    "slug": "madagascar_1",
+    "file": "epg_madagascar_1.json",
+    "count": 161,
     "updated": "11-09-0026",
     "external": false
   },
@@ -756,7 +772,7 @@
     "slug": "new_zealand_2",
     "file": "epg_new_zealand_2.json",
     "count": 33,
-    "updated": "10-09-0026",
+    "updated": "11-09-0026",
     "external": false
   },
   {
@@ -932,7 +948,7 @@
     "slug": "reunion_1",
     "file": "epg_reunion_1.json",
     "count": 209,
-    "updated": "10-09-0026",
+    "updated": "11-09-0026",
     "external": false
   },
   {
@@ -1203,7 +1219,7 @@
     "name": "Switzerland 2",
     "slug": "switzerland_2",
     "file": "epg_switzerland_2.json",
-    "count": 303,
+    "count": 302,
     "updated": "10-09-0026",
     "external": false
   },
@@ -1452,7 +1468,7 @@
     "slug": "zambia_1",
     "file": "epg_zambia_1.json",
     "count": 56,
-    "updated": "10-09-0026",
+    "updated": "11-09-0026",
     "external": false
   }
 ]
