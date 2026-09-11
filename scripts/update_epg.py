@@ -11,10 +11,11 @@ from concurrent.futures import ThreadPoolExecutor
 API_FETCH_URL = "https://www.open-epg.com/app/epgfetch.php"
 PLUTO_TV_URL = "https://i.mjh.nz/PlutoTV/all.xml.gz"
 
-# FASE REPARACIÓN (v133): Nuevas fuentes 2026 (Bypass Albaforge Obsoleto)
-FLOW_AR_URL = "https://i.mjh.nz/CableVision/ar.xml.gz"
-FLOW_PY_URL = "https://i.mjh.nz/CableVision/py.xml.gz"
-LATINO_BACKUP_URL = "https://raw.githubusercontent.com/acidjesuz/EPGTalk/master/Latino_guide.xml.gz"
+# FASE REPARACIÓN (v135): Nuevas fuentes 2026 VERIFICADAS (Bypass MJH Fallido)
+# EPG.lat es más confiable para Flow en Argentina/Paraguay en 2026
+FLOW_AR_URL = "https://epg.lat/files/ar.xml.gz"
+FLOW_PY_URL = "https://epg.lat/files/py.xml.gz"
+LATINO_PRO_URL = "https://raw.githubusercontent.com/acidjesuz/EPGTalk/master/guide.xml.gz"
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
@@ -108,7 +109,7 @@ def process_country(item):
     return None
 
 def run():
-    print("🚀 INICIANDO MOTOR NOVA-EPG ULTRA-FAST (v133)...")
+    print("🚀 INICIANDO MOTOR NOVA-EPG ULTRA-FAST (v135)...")
     start_time = time.time()
     files = get_files_list()
     if not files: return
@@ -125,7 +126,7 @@ def run():
         c, p = extract_channels_and_programs(NOVASPORTS_FILE)
         sources.append({"name": "NOVASPORTS", "channels": c, "programs": p, "age": "24/7", "is_external": False})
 
-    # 2. Fuentes Externas Premium (v133)
+    # 2. Fuentes Externas Premium (v135)
     print("🎬 Procesando Pluto TV...")
     path_pluto = download_file(PLUTO_TV_URL, "Pluto TV")
     if path_pluto:
@@ -135,6 +136,7 @@ def run():
         except: pass
 
     print("📡 Procesando FLOW (Argentina + Paraguay)...")
+    # Estas fuentes de EPG.lat contienen el lineup de Flow
     for url, label in [(FLOW_AR_URL, "Flow Argentina"), (FLOW_PY_URL, "Flow Paraguay")]:
         path = download_file(url, label)
         if path:
@@ -143,11 +145,11 @@ def run():
             try: os.remove(path)
             except: pass
 
-    print("📡 Procesando Latino Backup (EPGTalk)...")
-    path_latino = download_file(LATINO_BACKUP_URL, "Latino Backup")
+    print("📡 Procesando Latino Pro (EPGTalk)...")
+    path_latino = download_file(LATINO_PRO_URL, "Latino Pro")
     if path_latino:
         c, p = extract_channels_and_programs(path_latino)
-        sources.append({"name": "Latino Backup", "channels": c, "programs": p, "age": "Ahora", "is_external": True})
+        sources.append({"name": "Latino Pro", "channels": c, "programs": p, "age": "Ahora", "is_external": True})
         try: os.remove(path_latino)
         except: pass
 
