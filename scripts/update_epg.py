@@ -77,8 +77,20 @@ def extract_channels_and_programs(xml_path, is_gz=False):
     p_regex = re.compile(r'<programme start="(.*?)" stop="(.*?)" channel="(.*?)">.*?<title.*?>(.*?)</title>(.*?)</programme>', re.DOTALL)
     icon_regex = re.compile(r'<icon src="(.*?)"')
     desc_regex = re.compile(r'<desc.*?>(.*?)</desc>')
+
     try:
-        opener = gzip.open(xml_path, 'rt', encoding='utf-8', errors='ignore') if xml_path.endswith('.gz') or is_gz else open(xml_path, 'r', encoding='utf-8', errors='ignore')
+        # FASE REPARACIÓN (v136): Detección real de GZIP (Bypass de extensiones mentirosas)
+        is_actually_gz = False
+        if os.path.exists(xml_path):
+            with open(xml_path, 'rb') as f_check:
+                magic = f_check.read(2)
+                is_actually_gz = (magic == b'\x1f\x8b')
+
+        if is_actually_gz:
+            opener = gzip.open(xml_path, 'rt', encoding='utf-8', errors='ignore')
+        else:
+            opener = open(xml_path, 'r', encoding='utf-8', errors='ignore')
+
         with opener as f:
             content = f.read()
             for match in c_regex.finditer(content):
