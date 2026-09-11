@@ -245,7 +245,7 @@
             const res = await fetch('data/search_db.json?t=' + Date.now());
             searchData = await res.json();
 
-            // FASE PERSISTENCIA (v119): Recuperar última búsqueda/filtro
+            // FASE PERSISTENCIA (v134): Recuperar última búsqueda o filtro
             const lastSearch = localStorage.getItem("last_epg_search");
             if (lastSearch) {
                 document.getElementById('mainSearch').value = lastSearch;
@@ -253,7 +253,9 @@
             }
         } catch (e) {
             console.error("Error cargando DB:", e);
-            document.getElementById('resultsArea').innerHTML = '<p style="text-align:center;">Error al cargar la base de datos de canales.</p>';
+            if (document.getElementById('resultsArea')) {
+                document.getElementById('resultsArea').innerHTML = '<p style="text-align:center;">Error al cargar la base de datos de canales.</p>';
+            }
         }
     }
 
@@ -263,17 +265,17 @@
     }
 
     function UI_MostrarPanel() {
-        document.getElementById("navLogin").style.display = 'none';
-        document.getElementById("adminMenu").style.display = 'flex';
-        document.getElementById("auth-view").classList.add("hidden");
-        document.querySelector(".search-container").classList.remove("hidden");
+        if (document.getElementById("navLogin")) document.getElementById("navLogin").style.display = 'none';
+        if (document.getElementById("adminMenu")) document.getElementById("adminMenu").style.display = 'flex';
+        if (document.getElementById("auth-view")) document.getElementById("auth-view").classList.add("hidden");
+        if (document.querySelector(".search-container")) document.querySelector(".search-container").classList.remove("hidden");
     }
 
     function UI_MostrarLogin() {
-        document.getElementById("navLogin").style.display = 'block';
-        document.getElementById("adminMenu").style.display = 'none';
-        document.getElementById("auth-view").classList.remove("hidden");
-        document.querySelector(".search-container").classList.add("hidden");
+        if (document.getElementById("navLogin")) document.getElementById("navLogin").style.display = 'block';
+        if (document.getElementById("adminMenu")) document.getElementById("adminMenu").style.display = 'none';
+        if (document.getElementById("auth-view")) document.getElementById("auth-view").classList.remove("hidden");
+        if (document.querySelector(".search-container")) document.querySelector(".search-container").classList.add("hidden");
     }
 
     function UI_OcultarLogin() {
@@ -281,8 +283,8 @@
             alert("Debe iniciar sesión para acceder al buscador.");
             return;
         }
-        document.getElementById("auth-view").classList.add("hidden");
-        document.querySelector(".search-container").classList.remove("hidden");
+        if (document.getElementById("auth-view")) document.getElementById("auth-view").classList.add("hidden");
+        if (document.querySelector(".search-container")) document.querySelector(".search-container").classList.remove("hidden");
     }
 
     async function iniciarSesion() {
@@ -395,27 +397,30 @@
 
     function search() {
         const val = document.getElementById('mainSearch').value.toLowerCase();
-        localStorage.setItem("last_epg_search", val); // FASE PERSISTENCIA (v119)
+        localStorage.setItem("last_epg_search", val); // FASE PERSISTENCIA (v134)
         const area = document.getElementById('resultsArea');
         if (val.length < 2) {
             area.innerHTML = '<div style="text-align: center; padding: 50px; color: var(--text-muted);"><i class="fa-solid fa-tv fa-3x" style="margin-bottom: 20px; opacity: 0.2;"></i><p>Escribe al menos 2 letras...</p></div>';
             return;
         }
+
         const filtered = searchData.filter(c => {
-            if (val === 'flow') return c.c.toLowerCase().includes('flow');
+            // Filtro FLOW robusto: busca en el país o fuente (campo 'c')
+            if (val === 'flow') return c.c.toLowerCase().includes('flow') || c.c.toLowerCase().includes('cablevision');
             return c.n.toLowerCase().includes(val) || c.id.toLowerCase().includes(val) || c.c.toLowerCase().includes(val);
         }).slice(0, 40);
+
         if (filtered.length === 0) {
             area.innerHTML = '<p style="text-align:center; padding: 50px;">No se encontraron canales.</p>';
             return;
         }
         area.innerHTML = filtered.map(c => {
-            const programs = c.p.map(p => `<div class="prog-mini-item"><span class="prog-time">${formatTime(p.s)}</span><span class="prog-title">${p.t}</span></div>`).join('');
+            const programs = (c.p || []).map(p => `<div class="prog-mini-item"><span class="prog-time">${formatTime(p.s)}</span><span class="prog-title">${p.t}</span></div>`).join('');
             return `
-                <div class="channel-result" style="${c.c === 'Pluto TV' ? 'border-left: 5px solid #0073ff;' : ''}">
+                <div class="channel-result" style="${c.c.toLowerCase().includes('flow') ? 'border-left: 5px solid #ffd700;' : ''}">
                     <img src="${c.l || 'https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp'}" class="ch-logo" onerror="this.src='https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp'">
                     <div class="ch-info">
-                        <div class="ch-country" style="${c.c === 'Pluto TV' ? 'color: #0073ff;' : ''}">${c.c === 'Pluto TV' ? '<i class="fa-solid fa-circle-play"></i> PLUTO TV' : c.c}</div>
+                        <div class="ch-country" style="${c.c.toLowerCase().includes('flow') ? 'color: #ffd700;' : ''}">${c.c}</div>
                         <h3>${c.n}</h3>
                         <div class="id-badge" onclick="copyId('${c.id}')"><i class="fa-regular fa-copy"></i> ${c.id}</div>
                         <br><a href="epg.html?file=${encodeURIComponent(c.f)}&n=${encodeURIComponent(c.c)}" class="btn-full-guide"><i class="fa-solid fa-calendar-days"></i> Ver guía completa</a>
@@ -430,8 +435,10 @@
 
     function copyId(id) {
         navigator.clipboard.writeText(id).then(() => {
-            event.currentTarget.innerHTML = '<i class="fa-solid fa-check"></i> COPIADO';
-            alert('Copiado: ' + id);
+            const target = event.currentTarget;
+            const originalHtml = target.innerHTML;
+            target.innerHTML = '<i class="fa-solid fa-check"></i> COPIADO';
+            setTimeout(() => { target.innerHTML = originalHtml; }, 2000);
         });
     }
 
