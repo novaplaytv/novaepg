@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -28,7 +28,7 @@
         * { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
         html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
-        /* Navegación Premium Unificada */
+        /* NavegaciÃ³n Premium Unificada */
         .nova-nav { position: fixed; top: 0; width: 100%; z-index: 10000; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
         .nav-inner { max-width: 1400px; margin: auto; height: var(--nav-height); padding: 0 30px; display: flex; align-items: center; justify-content: space-between; }
         .nav-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; font-weight: 900; font-size: 22px; letter-spacing: -1px; }
@@ -141,10 +141,10 @@
             <img src="https://raw.githubusercontent.com/novaplaytv/novaimg/main/novasplash.webp" alt="Logo">
             <div style="display: flex; flex-direction: column; line-height: 1;">
                 NOVAPLAY | BUSCADOR EPG
-                <span id="statusBadge" style="font-size: 8px; font-weight: 800; margin-top: 4px; letter-spacing: 0; opacity: 0.8; color: #4caf50;">🟢 OPERATIVO</span>
+                <span id="statusBadge" style="font-size: 8px; font-weight: 800; margin-top: 4px; letter-spacing: 0; opacity: 0.8; color: #4caf50;">ðŸŸ¢ OPERATIVO</span>
             </div>
         </a>
-        <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">
+        <button class="nav-toggle" id="navToggle" aria-label="Abrir menÃº">
             <span></span>
             <span></span>
             <span></span>
@@ -158,11 +158,11 @@
                     <a href="https://novaplaytv.github.io/Dashboard/"><i class="fas fa-chart-line"></i> Dashboard Central</a>
                     <a href="https://novaplaytv.github.io/panel-canales/"><i class="fas fa-tv"></i> Admin. Canales</a>
                     <a href="https://novaplaytv.github.io/NovaSecurity/"><i class="fas fa-shield-alt"></i> NovaSecurity</a>
-                    <a href="https://novaplaytv.github.io/SignalVerificador/"><i class="fas fa-broadcast-tower"></i> Verificador de Señal</a>
-                    <a href="https://novaplaytv.github.io/novaimg/actualizar-icono/"><i class="fas fa-icons"></i> Gestión de Iconos</a>
+                    <a href="https://novaplaytv.github.io/SignalVerificador/"><i class="fas fa-broadcast-tower"></i> Verificador de SeÃ±al</a>
+                    <a href="https://novaplaytv.github.io/novaimg/actualizar-icono/"><i class="fas fa-icons"></i> GestiÃ³n de Iconos</a>
                     <a href="https://novaplaytv.github.io/novaimg/generador/"><i class="fas fa-magic"></i> Icon Studio</a>
                     <a href="https://novaplaytv.github.io/novaepg/"><i class="fas fa-calendar-alt"></i> Buscador EPG ID</a>
-                    <a href="#" onclick="cerrarSesion(); return false;" class="logout-link" style="color: var(--error) !important;"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+                    <a href="#" onclick="cerrarSesion(); return false;" class="logout-link" style="color: var(--error) !important;"><i class="fas fa-sign-out-alt"></i> Cerrar SesiÃ³n</a>
                 </div>
             </div>
         </div>
@@ -180,8 +180,8 @@
             <input type="text" id="username" placeholder="Usuario" autocomplete="username">
         </div>
         <div class="form-group-auth">
-            <label>Contraseña</label>
-            <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+            <label>ContraseÃ±a</label>
+            <input type="password" id="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" autocomplete="current-password">
         </div>
         <button class="btn-admin" id="loginButton" style="width:100%; justify-content:center; padding: 18px; border-radius: 14px; font-weight: 900; background: var(--primary); color: #fff;" onclick="iniciarSesion()">INGRESAR AL SISTEMA</button>
         <div id="loginStatus" class="status"></div>
@@ -191,7 +191,7 @@
 <div class="search-container hidden">
     <div class="search-header">
         <h1>Busca tu Canal</h1>
-        <p>Encuentra el EPG ID y consulta la programación al instante.</p>
+        <p>Encuentra el EPG ID y consulta la programaciÃ³n al instante.</p>
     </div>
 
     <div class="search-bar">
@@ -270,7 +270,7 @@
 
     function UI_OcultarLogin() {
         if (!sessionToken) {
-            alert("Debe iniciar sesión para acceder al buscador.");
+            alert("Debe iniciar sesiÃ³n para acceder al buscador.");
             return;
         }
         document.getElementById("auth-view").classList.add("hidden");
@@ -306,14 +306,14 @@
                 btn.textContent = 'INGRESAR AL SISTEMA';
             }
         } catch(e) {
-            alert("Error de conexión.");
+            alert("Error de conexiÃ³n.");
             btn.disabled = false;
             btn.textContent = 'INGRESAR AL SISTEMA';
         }
     }
 
     async function cerrarSesion() {
-        const confirmResult = await openModal("Cerrar Sesión", "¿Estás seguro que deseas cerrar sesión?");
+        const confirmResult = await openModal("Cerrar SesiÃ³n", "Â¿EstÃ¡s seguro que deseas cerrar sesiÃ³n?");
         if (confirmResult) {
             localStorage.removeItem("novaplay_session_token");
             sessionToken = null;
@@ -406,11 +406,11 @@
                         <div class="ch-country" style="${c.c === 'Pluto TV' ? 'color: #0073ff;' : ''}">${c.c === 'Pluto TV' ? '<i class="fa-solid fa-circle-play"></i> PLUTO TV' : c.c}</div>
                         <h3>${c.n}</h3>
                         <div class="id-badge" onclick="copyId('${c.id}')"><i class="fa-regular fa-copy"></i> ${c.id}</div>
-                        <br><a href="epg.html?file=${encodeURIComponent(c.f)}&n=${encodeURIComponent(c.c)}" class="btn-full-guide"><i class="fa-solid fa-calendar-days"></i> Ver guía completa</a>
+                        <br><a href="epg.html?file=${encodeURIComponent(c.f)}&n=${encodeURIComponent(c.c)}" class="btn-full-guide"><i class="fa-solid fa-calendar-days"></i> Ver guÃ­a completa</a>
                     </div>
                     <div class="prog-mini-list">
-                        <div style="font-weight: 800; font-size: 11px; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase;">Próximos Programas</div>
-                        ${programs || '<p style="font-size:12px; color:var(--text-muted);">Sin programación disponible.</p>'}
+                        <div style="font-weight: 800; font-size: 11px; color: var(--text-muted); margin-bottom: 15px; text-transform: uppercase;">PrÃ³ximos Programas</div>
+                        ${programs || '<p style="font-size:12px; color:var(--text-muted);">Sin programaciÃ³n disponible.</p>'}
                     </div>
                 </div>`;
         }).join('');
