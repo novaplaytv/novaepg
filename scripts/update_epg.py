@@ -10,6 +10,8 @@ from concurrent.futures import ThreadPoolExecutor
 # --- CONFIGURACIÓN ---
 API_FETCH_URL = "https://www.open-epg.com/app/epgfetch.php"
 PLUTO_TV_URL = "https://i.mjh.nz/PlutoTV/all.xml.gz"
+ALBA_ARG_URL = "https://albaforge.com/bin-cas6u/epg/an/EPG/ARGENTINA.xml.gz"
+ALBA_FLOW_URL = "https://albaforge.com/bin-cas6u/epg/an/EPG/FLOWTV.xml.gz"
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 EPG_DIR = os.path.join(BASE_DIR, "epg")
@@ -124,6 +126,22 @@ def run():
         c, p = extract_channels_and_programs(path_pluto)
         sources.append({"name": "Pluto TV", "channels": c, "programs": p, "age": "Ahora", "is_external": True})
         try: os.remove(path_pluto)
+        except: pass
+
+    print("📡 Procesando Alba Argentina...")
+    path_alba_arg = download_file(ALBA_ARG_URL, "Alba Argentina")
+    if path_alba_arg:
+        c, p = extract_channels_and_programs(path_alba_arg)
+        sources.append({"name": "Alba Argentina", "channels": c, "programs": p, "age": "Ahora", "is_external": True})
+        try: os.remove(path_alba_arg)
+        except: pass
+
+    print("📡 Procesando Alba Flow...")
+    path_alba_flow = download_file(ALBA_FLOW_URL, "Alba Flow")
+    if path_alba_flow:
+        c, p = extract_channels_and_programs(path_alba_flow)
+        sources.append({"name": "Alba Flow", "channels": c, "programs": p, "age": "Ahora", "is_external": True})
+        try: os.remove(path_alba_flow)
         except: pass
 
     print(f"🌍 Descarga paralela de {len(files)} países...")
