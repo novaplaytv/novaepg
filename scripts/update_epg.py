@@ -1,4 +1,4 @@
-﻿import requests
+import requests
 import os
 import gzip
 import json
@@ -16,7 +16,8 @@ FLOW_AR_URL = "https://epg.lat/files/ar.xml.gz"
 FLOW_PY_URL = "https://epg.lat/files/py.xml.gz"
 FLOW_UY_URL = "https://epg.lat/files/uy.xml.gz"
 FREE_EPG_PY_URL = "https://free-epg.de/api/epg/py.xml.gz"
-GLOBAL_WORLD_URL = "https://iptv-org.github.io/epg/guides/world.xml.gz"`nLATAM_HELMER_URL = "https://raw.githubusercontent.com/HelmerL86/EPG_Latin_America/main/EPG_Latino.xml.gz"
+GLOBAL_WORLD_URL = "https://iptv-org.github.io/epg/guides/world.xml.gz"
+LATAM_HELMER_URL = "https://raw.githubusercontent.com/HelmerL86/EPG_Latin_America/main/EPG_Latino.xml.gz"
 LATINO_MIX_URL = "https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guia.xml.gz"
 LATINO_PRO_URL = "https://raw.githubusercontent.com/acidjesuz/EPGTalk/master/guide.xml.gz"
 
@@ -158,7 +159,8 @@ def run():
         (FREE_EPG_PY_URL, "Free EPG Paraguay"),
         (GLOBAL_WORLD_URL, "Internacional Global"),
         (LATINO_MIX_URL, "Latino Mix"),
-        (LATINO_PRO_URL, "Latino Pro"),`n        (LATAM_HELMER_URL, "Latino Helmer")
+                (LATINO_PRO_URL, "Latino Pro"),
+        (LATAM_HELMER_URL, "Latino Helmer")
     ]
     
     for url, label in premium_sources:
