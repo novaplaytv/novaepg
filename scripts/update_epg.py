@@ -11,10 +11,13 @@ from concurrent.futures import ThreadPoolExecutor
 API_FETCH_URL = "https://www.open-epg.com/app/epgfetch.php"
 PLUTO_TV_URL = "https://i.mjh.nz/PlutoTV/all.xml.gz"
 
-# FASE REPARACIÓN (v135): Nuevas fuentes 2026 VERIFICADAS (Bypass MJH Fallido)
-# EPG.lat es más confiable para Flow en Argentina/Paraguay en 2026
+# FASE REPARACIÓN (v145): Nuevas fuentes 2026 (Sincronización Global)
 FLOW_AR_URL = "https://epg.lat/files/ar.xml.gz"
 FLOW_PY_URL = "https://epg.lat/files/py.xml.gz"
+FLOW_UY_URL = "https://epg.lat/files/uy.xml.gz"
+FREE_EPG_PY_URL = "https://free-epg.de/api/epg/py.xml.gz"
+GLOBAL_WORLD_URL = "https://iptv-org.github.io/epg/guides/world.xml.gz"`nLATAM_HELMER_URL = "https://raw.githubusercontent.com/HelmerL86/EPG_Latin_America/main/EPG_Latino.xml.gz"
+LATINO_MIX_URL = "https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guia.xml.gz"
 LATINO_PRO_URL = "https://raw.githubusercontent.com/acidjesuz/EPGTalk/master/guide.xml.gz"
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -147,23 +150,25 @@ def run():
         try: os.remove(path_pluto)
         except: pass
 
-    print("📡 Procesando FLOW (Argentina + Paraguay)...")
-    # Estas fuentes de EPG.lat contienen el lineup de Flow
-    for url, label in [(FLOW_AR_URL, "Flow Argentina"), (FLOW_PY_URL, "Flow Paraguay")]:
+        print("📡 Procesando fuentes Premium (Flow + Global)...")
+    premium_sources = [
+        (FLOW_AR_URL, "Flow Argentina"),
+        (FLOW_PY_URL, "Flow Paraguay"),
+        (FLOW_UY_URL, "Flow Uruguay"),
+        (FREE_EPG_PY_URL, "Free EPG Paraguay"),
+        (GLOBAL_WORLD_URL, "Internacional Global"),
+        (LATINO_MIX_URL, "Latino Mix"),
+        (LATINO_PRO_URL, "Latino Pro"),`n        (LATAM_HELMER_URL, "Latino Helmer")
+    ]
+    
+    for url, label in premium_sources:
+        print(f"📥 Cargando {label}...")
         path = download_file(url, label)
         if path:
             c, p = extract_channels_and_programs(path)
             sources.append({"name": label, "channels": c, "programs": p, "age": "Ahora", "is_external": True})
             try: os.remove(path)
             except: pass
-
-    print("📡 Procesando Latino Pro (EPGTalk)...")
-    path_latino = download_file(LATINO_PRO_URL, "Latino Pro")
-    if path_latino:
-        c, p = extract_channels_and_programs(path_latino)
-        sources.append({"name": "Latino Pro", "channels": c, "programs": p, "age": "Ahora", "is_external": True})
-        try: os.remove(path_latino)
-        except: pass
 
     # 3. Descarga paralela de Open-EPG
     print(f"🌍 Descarga paralela de {len(files)} países...")
